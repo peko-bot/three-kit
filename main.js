@@ -41,6 +41,9 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], functio
     scene.add(ambientLight);
     scene.add(directionalLight);
 
+    this.renderer = renderer;
+    this.camera = camera;
+
     // 初始化轨道控制
     var controls = new THREE.OrbitControls(camera, renderer.domElement);
     // 使动画循环使用时阻尼或自转 意思是否有惯性
@@ -125,6 +128,9 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], functio
                                         _changeModel4DataRefresh(child, object, maxData);
                                     });
                                     _afterMovementMesh(root, scene, camera, renderer);
+
+                                    // 绑定事件，比如鼠标移到板块上高亮
+                                    _initListener();
                                 }
                             }.bind(this));
                         tween.start();
@@ -139,6 +145,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], functio
                 */
                 var root = new THREE.Object3D();
                 root.add(object);
+                this.root = root;
                 
                 scene.add(root);
     
@@ -198,13 +205,16 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], functio
 		这是旋转mesh
 	*/
 	function _afterMovementMesh(root, scene, camera, renderer) {
+        // 旋转速度
+        var speed = 0.02;
+
 		var rotateAnimate = function(){
 			requestAnimationFrame(rotateAnimate);
 			
 			// y轴正半轴朝上
 			// this.root.position.y <= 0 ? this.root.position.y += 0.8 : null;
 			// 沿x轴旋转
-			root.rotation.x >= -Math.PI / 4 ? root.rotation.x -= 0.03 : null;
+			root.rotation.x >= -Math.PI / 4 ? root.rotation.x -= speed : null;
 			renderer.render(scene, camera);
 		};
 
@@ -316,5 +326,110 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], functio
 				vertice.z = minz + height;
 			}
 		}
-	};
+    };
+    
+    /**
+	 * 事件绑定
+	 * @private
+	 */
+	function _initListener() {
+		var dom = document.getElementById('container');
+        
+        // dom.addEventListener("mousemove", _setMeshHighLightStatus, false);
+    };
+    
+    /* 
+        改变板块的高亮状态
+
+        鼠标移上去，如果是板块，那改变该板块材质中的颜色
+        移开后恢复原来的材质
+        得注意边界线也是种模型，需要额外判断
+    */
+    function _setMeshHighLightStatus(event) {
+        event.preventDefault();
+
+        var intersected = _objectFromMouse(event.pageX, event.pageY);
+        var object = intersected.object;
+
+        // 工具类
+        var model = {
+            current: {}, // 当前选中板块对象
+            old: {}, // 第二次及以后选中的板块对象
+            getCurrent: function() {
+                return this.current;
+            },
+            getOld: function() {
+                return this.old;
+            },
+            getUuid: function() {
+                return this.current.uuid ? this.current.uuid : null;
+            },
+            set: function(current, old) {
+                this.current = current;
+                this.old = old;
+            }
+        };
+
+        // 设置/移除高亮
+        if(object) {
+            console.log(object)
+            var uuid = model.getUuid();
+            if(uuid === object.uuid) {
+                return;
+            }else {
+                if(!uuid){ // 第一次
+
+                    object.material.color.set('#F96');
+                }else {
+                    
+                }
+            }
+        }else { // 重置所有板块材质
+            
+        }
+    }
+
+    // 获得元素相对整个页面的偏移量
+    function getOffset(node, offset) {
+        if (!offset) {
+            offset = {};
+            offset.top = 0;
+            offset.left = 0;
+        }
+    
+        if (node == document.body) { // 当该节点为body节点时，结束递归
+            return offset;
+        }
+    
+        offset.top += node.offsetTop;
+        offset.left += node.offsetLeft;
+    
+        return getOffset(node.parentNode, offset); // 向上累加offset里的值
+    }
+
+    // 获得鼠标位置的板块模型对象
+    function _objectFromMouse(pagex, pagey) {
+        var offset = getOffset(this.renderer.domElement);
+        var eltx = pagex - offset.left;
+        var elty = pagey - offset.top;
+        var container = document.getElementById('container');
+        var vpx = (eltx / container.offsetWidth) * 2 - 1;
+        var vpy = -(elty / container.offsetHeight) * 2 + 1;
+        var vector = new THREE.Vector2(vpx, vpy);
+        var raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(vector, this.camera);
+        var intersects = raycaster.intersectObjects(this.root.children, true);
+        var len = intersects.length;
+        if (len > 0) {
+            var intersect = intersects[0];
+            if (intersect) {
+                return intersect;
+            }
+        }
+        return {
+            object: null,
+            point: null,
+            face: null
+        };
+    }
 });
