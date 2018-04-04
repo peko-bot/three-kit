@@ -1,0 +1,21 @@
+.detail {
+    position: absolute;
+    top: 25%;
+    right: 10%;
+    color: #FFF;
+    user-select: none;
+    transform: scale(1.58);
+    transform-origin: right top 0px;
+}
+
+.detail .detail-table {
+    table-layout: fixed;
+    padding: 0px 20px;
+    z-index: 2;
+    top: 20px;
+    left: 20px;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(to left, #31ABFE, #31ABFE) left top no-repeat, linear-gradient(to bottom, #31ABFE, #31ABFE) left top no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) right top no-repeat, linear-gradient(to bottom, #31ABFE, #31ABFE) right top no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) left bottom no-repeat, linear-gradient(to bottom, #31ABFE, #31ABFE) left bottom no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) right bottom no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) right bottom no-repeat;
+    background-size: 1px 20px, 20px 1px, 1px 20px, 20px 1px;
+}
