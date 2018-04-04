@@ -32,6 +32,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 
     var scene = new THREE.Scene();
 
+    // 相机视锥体的长宽比
     var _camera_aspect = clientWidth / clientHeight;
     var camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
     camera.position.z = 100;
@@ -110,7 +111,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
     
                         // 开始动画
                         var tween = new TWEEN.Tween(child.position)
-                            .to({x: 0, y: 0, z: 0}, time)
+                            .to({ x: 0, y: 0, z: 0 }, time)
                             .easing(TWEEN.Easing.Exponential.InOut)
                             .onComplete(function () {
                                 this._startTweenCount--;
@@ -126,7 +127,13 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                                         for(var j = 0; j < object.children.length; j++){
                                             var jtem = object.children[j];
 
-                                            if(item.stcd == jtem.name.split('_')[0] && /_pillar$/.test(jtem.name)){
+                                            /* 
+                                                如果加上正则验证，也就是非柱子的模型数据userData为空时，传到表格那边就会为空
+                                                在点击板块时是根据鼠标点击位置获得对象的，也就是说如果不点柱子是不会有数据的
+                                                待修正 mark
+                                            */
+                                            // if(item.stcd == jtem.name.split('_')[0] && /_pillar$/.test(jtem.name)){
+                                            if(item.stcd == jtem.name.split('_')[0]){
                                                 jtem.userData = item;
                                             }
                                         }
@@ -399,7 +406,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         var intersected = _objectFromMouse(event.pageX, event.pageY, [object]);
         var child = intersected.object;
 
-        if(child){
+        if(child) {
             _meshMove(true, object);
             _showTable(child);
         }
@@ -580,12 +587,19 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 	function _showTable(child) {
         var detail = document.getElementById('detail');
 
-		// if (detail.children.length != 0) {
-
-		// } else {
+		if (detail.children.length != 0) {
+            /* 
+                这里图省事就直接清空原先的children建新表了
+                实际上该去修改innerHTML，会省很多性能
+            */
+           for(var i = 0; i < detail.children.length; i++){
+               detail.removeChild(detail.children[i]);
+           }
+			_createTable(child, detail);
+		} else {
 			// 如果表格不存在，创建
 			_createTable(child, detail);
-		// }
+		}
     };
     
     /**
@@ -594,29 +608,31 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 	 */
 	function _createTable(child, element) {
         var data = child.userData;
-        var table = '';
-        console.log(data)
+        var table = '', decorate = '';
 
         table += 
         '<table border="0" cellspacing="0" cellpadding="0" class="detail-table">' +
             '<tr class="header"> ' + 
-                '<td></td>' + 
-                '<td>' + data.stnm + '</td>' +
+                '<td colspan="3"></td>' + 
+                '<td colspan="2">' + data.stnm + '</td>' +
             '</tr>'+
 
-            '<tr class="decorate">' + 
+            '<tr>' + 
                 '<td colspan="5"></td>' + 
             '</tr>' + 
 
             '<tr>' + 
-                '<td class="title">' + '水位' + '</td>' +
-                '<td class="value">' + data.val + '</td>' +
+                '<td class="title" colspan="3">' + '水位' + '</td>' +
+                '<td class="value" colspan="2">' + data.val + '</td>' +
             '</tr>' +
 
-            '<tr class="decorate">' + 
+            '<tr>' + 
                 '<td colspan="5"></td>' + 
             '</tr>' +
         '</table>';
-        element.innerHTML += table;
+
+        decorate += '<div class="decorate"></div>'
+
+        element.innerHTML += table + decorate;
 	};
 });
