@@ -24,6 +24,8 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
     this._current = null;
     // 配置
     this._config = _config;
+    // 多次用到容器节点，所以存到全局变量里方便调用
+    this._container = container;
 
     // 初始化three渲染三要素
     var renderer = new THREE.WebGLRenderer();
@@ -82,7 +84,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                         }
                     }
 
-                    _handle_child_material(child);
+                    _set_material(child);
 
                     // 初始化动画参数
                     _dealObjectInLoadCirculStart(child);
@@ -142,6 +144,8 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                                     // 渲染柱子
                                     object.traverse(function (child) {
                                         _changeModel4DataRefresh(child, object, maxData);
+
+                                        _setBorderVisible(child, true);
                                     });
                                     _afterMovementMesh(root, scene, camera, renderer);
 
@@ -351,10 +355,10 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
      * @param object .obj文件，所有模型数据。这里得注意跟child的区别，变量名写惯了都是object..
 	 */
 	function _initListener(config, object) {
-		var dom = document.getElementById('container');
+		var dom = this._container;
         
         dom.addEventListener('mousemove', function(e) {
-            return _setMeshHighLightStatus(e, config, object);
+            return _setMeshHighLightStatus(e, config);
         }, false);
 
         dom.addEventListener('click', function(e) {
@@ -369,26 +373,26 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         移开后恢复原来的材质
         得注意边界线也是种模型，需要额外判断
     */
-    function _setMeshHighLightStatus(event, config, object) {
-        var intersected = _objectFromMouse(event.pageX, event.pageY, [object]);
-        var object = intersected.object;
+    function _setMeshHighLightStatus(event, config) {
+        var intersected = _objectFromMouse(event.pageX, event.pageY);
+        var child = intersected.object;
 
         // 设置/移除高亮
-        if(object) {
+        if(child) {
             var uuid = this._current && this._current.uuid;
-            if(uuid === object.uuid) {
+            if(uuid === child.uuid) {
                 return;
             }else {
                 if(!uuid){ // 第一次
-                    this._current = object;
-                    object.material.color.set(config.select_color);
+                    this._current = child;
+                    child.material.color.set(config.select_color);
                 }else {
                     this._current.material.color.set(config.top_color);
 
                     this._old = this._current;
-                    this._current = object;
+                    this._current = child;
                     
-                    object.material.color.set(config.select_color);
+                    child.material.color.set(config.select_color);
                 }
 
             }
@@ -428,8 +432,8 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 		if (withdraw) {
 			rotation = { x: -Math.PI / 4, y: Math.PI / 180 * 10, z: 0 };
             
-            // 默认配比是500*300的设置
-            var gap = document.getElementById('container').clientWidth / 550;
+            // 默认配比是500 * 300的设置
+            var gap = this._container.clientWidth / 550;
             // 算移开的位置，移开的位置是固定的，只算一遍
 			if (!this._withdrawPosition) {
 				this._withdrawPosition = _getCoordinate2InScene({
@@ -450,7 +454,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 		this._meshTween = _tweenInOut(object.position, { x: point.x, y: 0, z: 0 });
     };
     
-    /* 获得模型宽度 */
+    // 获得模型宽度
     function getMeshWidth(object) {
         var c = 16711680, length = 0;
         var boxHelper = new THREE.BoxHelper(object, c);
@@ -482,18 +486,21 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
     }
 
     // 获得鼠标位置的板块模型对象
-    function _objectFromMouse(pagex, pagey, object) {
+    function _objectFromMouse(pagex, pagey) {
         var offset = getOffset(this.renderer.domElement);
         var eltx = pagex - offset.left;
         var elty = pagey - offset.top;
-        var container = document.getElementById('container');
+        var container = this._container;
+
         var vpx = (eltx / container.offsetWidth) * 2 - 1;
         var vpy = -(elty / container.offsetHeight) * 2 + 1;
         var vector = new THREE.Vector2(vpx, vpy);
         var raycaster = new THREE.Raycaster();
+
         raycaster.setFromCamera(vector, this.camera);
-        // var intersects = raycaster.intersectObjects(this.root.children, true);
-        var intersects = raycaster.intersectObjects(object, true);
+        
+        var intersects = raycaster.intersectObjects(this.root.children, true);
+
         var len = intersects.length;
         if (len > 0) {
             var intersect = intersects[0];
@@ -501,6 +508,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                 return intersect;
             }
         }
+        
         return {
             object: null,
             point: null,
@@ -508,7 +516,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         };
     }
 
-    function _handle_child_material(child) {
+    function _set_material(child) {
         if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
             var name = child.name.split('_');
             var last_name = name[name.length - 1];
@@ -520,8 +528,8 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                 break;
 
                 case 'pillar': // 柱子贴图
-                    child.material.color.set(_config.pillar_color);
-                    // child.material.map = new THREE.TextureLoader().load("../assets/texture/crate.jpg");
+                    // child.material.color.set(_config.pillar_color);
+                    child.material.map = new THREE.TextureLoader().load("../assets/texture/crate.jpg");
                 break;
 
                 case 'bottom': // 底部贴图
@@ -536,6 +544,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         }
     }
 
+    // 计算模型移动距离
     function _getCoordinate2InScene(i, d, c) {
         d.updateMatrixWorld(true);
         var b = getVector2InScene(i, c);
@@ -634,5 +643,16 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         decorate += '<div class="decorate"></div>'
 
         element.innerHTML += table + decorate;
-	};
+    };
+    
+    /* 
+        @param flag 是否显示边界
+    */
+    function _setBorderVisible(child, flag) {
+        if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+            var prefix = "deqing";
+            // 开场动画完成后显示地图边界
+            child.name.slice(0, prefix.length) === prefix && (child.visible = flag);
+        }
+    }
 });
