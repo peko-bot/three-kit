@@ -387,12 +387,15 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                     this._current = child;
                     child.material.color.set(config.select_color);
                 }else {
-                    this._current.material.color.set(config.top_color);
-
-                    this._old = this._current;
-                    this._current = child;
-                    
-                    child.material.color.set(config.select_color);
+                    var name = child.name;
+                    if(!name.includes('border') && !name.includes('bottom') && !name.includes('Line') && !name.includes('pillar')){
+                        this._current.material.color.set(config.top_color);
+    
+                        this._old = this._current;
+                        this._current = child;
+                        
+                        child.material.color.set(config.select_color);
+                    }
                 }
 
             }
