@@ -145,9 +145,9 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                                 object.traverse(function (child) {
                                     _changeModel4DataRefresh(child, object, maxData);
 
-                                    _setBorderVisible(child, true);
+                                    Util.setBorderVisible(child, true, "deqing");
                                 });
-                                _afterMovementMesh(root, scene, camera, renderer);
+                                Util.afterMovementMesh(root, scene, camera, renderer);
 
                                 // 绑定事件，比如鼠标移到板块上高亮
                                 _initListener(_config, object);
@@ -199,15 +199,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 		if (/_pillar$/.test(child.name)) {
 			child.castShadow = this._shadow;
 		} else if (/^(\w*_border)|(china_\w*)$/.test(child.name)) {
-			if ('nhzd_border' !== child.name) {
-				child.visible = false;
-			}
-		}
-		if (child instanceof THREE.Line) {
-			if (!/^nhzd_jiuduanxian_[0-9]{2}$/.test(child.name)) {
-				// 地区边线不显示，鼠标晃上去才显示
-				child.visible = false;
-			}
+            // child.visible = false;
 		}
 
         if (child instanceof THREE.Mesh) {
@@ -218,28 +210,6 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         }
     }
 
-    /* 
-		完成开场动画后，相机视角变动
-		一种是旋转mesh，一种是改变相机位置
-		这是旋转mesh
-	*/
-	function _afterMovementMesh(root, scene, camera, renderer) {
-        // 旋转速度
-        var speed = 0.02;
-
-		var rotateAnimate = function(){
-			requestAnimationFrame(rotateAnimate);
-			
-			// y轴正半轴朝上
-			// this.root.position.y <= 0 ? this.root.position.y += 0.8 : null;
-			// 沿x轴旋转
-			root.rotation.x >= -Math.PI / 4 ? root.rotation.x -= speed : null;
-			renderer.render(scene, camera);
-		};
-
-		rotateAnimate();
-    }
-    
     function _changeModel4DataRefresh(child, object, maxData) {
         var name = child.name;
         
@@ -261,8 +231,6 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 				} else {
 					_setHeightSlow(child, height);
 					child.visible = true;
-					// var o = object.getObjectByName(dmName);
-					// o._data = child.userData;
 				}
 			} else {
 				dmName = name ? name.split("_")[0] : '';
@@ -383,8 +351,11 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                 return;
             }else {
                 if(!uuid){ // 第一次
-                    this._current = child;
-                    child.material.color.set(config.select_color);
+                    if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
+                        this._current = child;
+                        
+                        child.material.color.set(config.select_color);
+                    }
                 }else {
                     if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
                         this._current.material.color.set(config.top_color);
@@ -600,9 +571,8 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
     /* 
         @param flag 是否显示边界
     */
-    function _setBorderVisible(child, flag) {
+    function _setBorderVisible(child, flag, prefix) {
         if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
-            var prefix = "deqing";
             // 开场动画完成后显示地图边界
             child.name.slice(0, prefix.length) === prefix && (child.visible = flag);
         }
