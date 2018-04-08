@@ -5,11 +5,12 @@ require.config({
         'obj-loader': './third/three/loaders/OBJLoader',
         'orbitControls': './third/three/controls/OrbitControls',
         'tween': './third/tween/Tween',
+        'util': './util/MeshHelper',
         'config': './config'
     },
 })
 
-require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, _config){
+require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config', 'util'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, _config, Util){
     var clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
     var clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
     var container = document.getElementById('container');
@@ -30,6 +31,8 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
     // 初始化three渲染三要素
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(clientWidth, clientHeight - 4);
+    // 设置背景颜色
+    // renderer.setClearColor(0x4584b4);
     container.appendChild(renderer.domElement);
 
     var scene = new THREE.Scene();
@@ -72,7 +75,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
             fetch('./data/simulation.json').then(function(response) {
                 return response.json();
             }).then(function(result) {
-                object.traverse(function (child) {
+                object.traverse(function(child) {
                     if (child instanceof THREE.Group) {
                         return;
                     }
@@ -112,48 +115,44 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                         time = 2000;
     
                         // 开始动画
-                        var tween = new TWEEN.Tween(child.position)
-                            .to({ x: 0, y: 0, z: 0 }, time)
-                            .easing(TWEEN.Easing.Exponential.InOut)
-                            .onComplete(function () {
-                                this._startTweenCount--;
-                                if (this._startTweenCount === 0) {
-                                    // 求最大值，用于计算柱子高度
-                                    var maxData = 0;
-                                    // 处理业务数据和模型数据，使之一一对应
-                                    for(var i = 0; i < result.length; i++){
-                                        var item = result[i];
+                        _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function () {
+                            this._startTweenCount--;
+                            if (this._startTweenCount === 0) {
+                                // 求最大值，用于计算柱子高度
+                                var maxData = 0;
+                                // 处理业务数据和模型数据，使之一一对应
+                                for(var i = 0; i < result.length; i++){
+                                    var item = result[i];
 
-                                        maxData = Math.max(item.val, maxData);
+                                    maxData = Math.max(item.val, maxData);
 
-                                        for(var j = 0; j < object.children.length; j++){
-                                            var jtem = object.children[j];
+                                    for(var j = 0; j < object.children.length; j++){
+                                        var jtem = object.children[j];
 
-                                            /* 
-                                                如果加上正则验证，也就是非柱子的模型数据userData为空时，传到表格那边就会为空
-                                                在点击板块时是根据鼠标点击位置获得对象的，也就是说如果不点柱子是不会有数据的
-                                                待修正 mark
-                                            */
-                                            // if(item.stcd == jtem.name.split('_')[0] && /_pillar$/.test(jtem.name)){
-                                            if(item.stcd == jtem.name.split('_')[0]){
-                                                jtem.userData = item;
-                                            }
+                                        /* 
+                                            如果加上正则验证，也就是非柱子的模型数据userData为空时，传到表格那边就会为空
+                                            在点击板块时是根据鼠标点击位置获得对象的，也就是说如果不点柱子是不会有数据的
+                                            待修正 mark
+                                        */
+                                        // if(item.stcd == jtem.name.split('_')[0] && /_pillar$/.test(jtem.name)){
+                                        if(item.stcd == jtem.name.split('_')[0]){
+                                            jtem.userData = item;
                                         }
                                     }
-
-                                    // 渲染柱子
-                                    object.traverse(function (child) {
-                                        _changeModel4DataRefresh(child, object, maxData);
-
-                                        _setBorderVisible(child, true);
-                                    });
-                                    _afterMovementMesh(root, scene, camera, renderer);
-
-                                    // 绑定事件，比如鼠标移到板块上高亮
-                                    _initListener(_config, object);
                                 }
-                            }.bind(this));
-                        tween.start();
+
+                                // 渲染柱子
+                                object.traverse(function (child) {
+                                    _changeModel4DataRefresh(child, object, maxData);
+
+                                    _setBorderVisible(child, true);
+                                });
+                                _afterMovementMesh(root, scene, camera, renderer);
+
+                                // 绑定事件，比如鼠标移到板块上高亮
+                                _initListener(_config, object);
+                            }
+                        }.bind(this));
                         this._startTweenCount++;
                     }
                 });
@@ -374,7 +373,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         得注意边界线也是种模型，需要额外判断
     */
     function _setMeshHighLightStatus(event, config) {
-        var intersected = _objectFromMouse(event.pageX, event.pageY);
+        var intersected = Util.objectFromMouse.call(this, event.pageX, event.pageY);
         var child = intersected.object;
 
         // 设置/移除高亮
@@ -387,8 +386,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                     this._current = child;
                     child.material.color.set(config.select_color);
                 }else {
-                    var name = child.name;
-                    if(!name.includes('border') && !name.includes('bottom') && !name.includes('Line') && !name.includes('pillar')){
+                    if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
                         this._current.material.color.set(config.top_color);
     
                         this._old = this._current;
@@ -410,7 +408,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
     function _showDetail(event, config, object) {
         event.preventDefault();
 
-        var intersected = _objectFromMouse(event.pageX, event.pageY, [object]);
+        var intersected = Util.objectFromMouse.call(this, event.pageX, event.pageY);
         var child = intersected.object;
 
         if(child) {
@@ -454,7 +452,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 			TWEEN.remove(this._meshTween);
 			this._meshTween = null;
         }
-		this._meshTween = _tweenInOut(object.position, { x: point.x, y: 0, z: 0 });
+		this._meshTween = _tweenInOut(object.position, { x: point.x, y: 0, z: 0 }, 1000);
     };
     
     // 获得模型宽度
@@ -470,62 +468,13 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
         return length;
     }
 
-    // 获得元素相对整个页面的偏移量
-    function getOffset(node, offset) {
-        if (!offset) {
-            offset = {};
-            offset.top = 0;
-            offset.left = 0;
-        }
-    
-        if (node == document.body) { // 当该节点为body节点时，结束递归
-            return offset;
-        }
-    
-        offset.top += node.offsetTop;
-        offset.left += node.offsetLeft;
-    
-        return getOffset(node.parentNode, offset); // 向上累加offset里的值
-    }
-
-    // 获得鼠标位置的板块模型对象
-    function _objectFromMouse(pagex, pagey) {
-        var offset = getOffset(this.renderer.domElement);
-        var eltx = pagex - offset.left;
-        var elty = pagey - offset.top;
-        var container = this._container;
-
-        var vpx = (eltx / container.offsetWidth) * 2 - 1;
-        var vpy = -(elty / container.offsetHeight) * 2 + 1;
-        var vector = new THREE.Vector2(vpx, vpy);
-        var raycaster = new THREE.Raycaster();
-
-        raycaster.setFromCamera(vector, this.camera);
-        
-        var intersects = raycaster.intersectObjects(this.root.children, true);
-
-        var len = intersects.length;
-        if (len > 0) {
-            var intersect = intersects[0];
-            if (intersect) {
-                return intersect;
-            }
-        }
-        
-        return {
-            object: null,
-            point: null,
-            face: null
-        };
-    }
-
     function _set_material(child) {
         if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
             var name = child.name.split('_');
             var last_name = name[name.length - 1];
 
             // 改变模型贴图
-            switch(last_name){
+            switch(last_name) {
                 case 'Line': // 内部乡镇边界贴图
                     child.material.color.set(_config.line_color);
                 break;
@@ -540,7 +489,7 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
                 break;
             }
 
-            if(name.length == 1){ // 上层表面贴图
+            if(name.length == 1) { // 上层表面贴图
                 child.material.color.set(_config.top_color);
                 // child.material.opacity = 0.1;
             }
@@ -574,13 +523,13 @@ require(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'config'
 
     /**
 	 * TWEEN动画，封装一下调用的时候写简单点
-	 * @param a
-	 * @param b
-	 * @private
+	 * @param a 起点
+	 * @param b 终点
+     * @param t 过渡时间
 	 */
-	function _tweenInOut(a, b, c, s) {
+	function _tweenInOut(a, b, t, c, s) {
 		var tween = new TWEEN.Tween(a)
-			.to(b, this._duration)
+			.to(b, t)
 			.easing(TWEEN.Easing.Exponential.InOut);
 		if(c) {
 			tween.onComplete(c);
