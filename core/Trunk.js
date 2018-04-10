@@ -30,8 +30,6 @@ define([
     // 初始化three渲染三要素
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(clientWidth, clientHeight - 4);
-    // 设置背景颜色
-    // renderer.setClearColor(0x4584b4);
     container.appendChild(renderer.domElement);
 
     var scene = new THREE.Scene();
@@ -81,7 +79,12 @@ define([
         }
     }
 
-    function _changeModel4DataRefresh(child, object, maxData) {
+    /**
+     * 处理柱子渲染
+     * @param child 当前遍历模型对象
+     * @param divisor 计算柱子高度，柱子高度 = 当前模型中数据 / divisor * 15，也就是说divisor越小，柱子越高
+    */
+    function _changeModel4DataRefresh(child, divisor) {
         var name = child.name;
         
         if (/_pillar$/.test(name)) {
@@ -91,8 +94,8 @@ define([
                 var height = 0;
                 var proportion = 0;
 
-                if (maxData && 0 !== maxData) {
-                    proportion = data / maxData;
+                if (divisor && 0 !== divisor) {
+                    proportion = data / divisor;
                     height = proportion * 15;
                 }
 
@@ -463,7 +466,7 @@ define([
 
         rotateAnimate();
     }
-    
+
     var init = function(_config) {
         // 初始化轨道控制
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -478,7 +481,6 @@ define([
         }
 
         // 设置背景颜色
-        // renderer.setClearColor(0x4584b4);
         _config.clear_color && renderer.setClearColor(_config.clear_color);
 
         mtlLoader.load(_config.data.materials, function(materials) {
@@ -540,13 +542,9 @@ define([
                             _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function () {
                                 this._startTweenCount--;
                                 if (this._startTweenCount === 0) {
-                                    // 求最大值，用于计算柱子高度
-                                    var maxData = 0;
                                     // 处理业务数据和模型数据，使之一一对应
-                                    for(var i = 0; i < result.length; i++){
+                                    for(var i = 0; i < result.length; i++) {
                                         var item = result[i];
-
-                                        maxData = Math.max(item.val, maxData);
 
                                         for(var j = 0; j < object.children.length; j++){
                                             var jtem = object.children[j];
@@ -565,7 +563,7 @@ define([
 
                                     // 渲染柱子
                                     object.traverse(function (child) {
-                                        _changeModel4DataRefresh(child, object, maxData);
+                                        _changeModel4DataRefresh(child, _config.divisor);
 
                                         _setBorderVisible(child, _config.top_border_visible, _config.top_border_prefix);
                                     });

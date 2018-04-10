@@ -12,15 +12,16 @@ require.config({
 require(['three', 'trunk'], function(THREE, Trunk){
     var Trunk = new Trunk();
     Trunk.init({
-        // clear_color: 0x4584b4, // 画布颜色
+        clear_color: 0x4584b4, // 画布颜色
         top_border_visible: true, // 是否显示上边界
         bottom_border_visible: false, // 是否显示下边界
         top_border_prefix: 'deqing', // 模型文件中边界名称
-        mesh_shift_time: function(time) { // 定义各板块移动速度
-            var duration = 1000;
+        // mesh_shift_time: function(time) { // 定义各板块移动速度
+        //     var duration = 1000;
 
-            return Math.random() * duration * 5 + duration;
-        },
+        //     return Math.random() * duration * 5 + duration;
+        // },
+        divisor: 12000,
         texture: {
             line: '#045AAF', // 内部乡镇边界贴图
             pillar: '#1E8FF7', // 柱子贴图
@@ -71,7 +72,7 @@ require(['three', 'trunk'], function(THREE, Trunk){
         },
         controls: { // 轨道控制参数
             enableDamping: true, // 使动画循环使用时阻尼或自转，意思是否有惯性
-            enableZoom: true, // 是否可以缩放
+            enableZoom: false, // 是否可以缩放
             enabled: true, // 是否启用轨道控制
         }
     });
