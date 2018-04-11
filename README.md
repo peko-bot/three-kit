@@ -23,9 +23,7 @@
 | container | 挂载画布的节点 | dom | 无 |
 | divisor | 用于控制柱子高度，算法：柱子高度 = 当前模型中数据 / divisor * 15，也就是说divisor越小，柱子越高。一般是传数据中的最大值 | String或Number | 无 |
 | clear_color | 颜色字符串，hex、十六进制都行，不传就是黑的 | String | 无 |
-| top_border_visible | 是否显示上边界 | Boolean | false |
-| bottom_border_visible | 是否显示下边界 | Boolean | false |
-| top_border_prefix | 模型文件中边界名称，这个名称得去obj文件中找 | String | 无 |
+| border_visible | 是否显示上下边界 | Boolean | false |
 | mesh_shift_time | 定义各板块移动时间，单位毫秒 | Number | 2000 |
 | texture | 模型贴图，具体参数见下 | {} | 无 |
 | light | 初始化光线，需要手动return光线实例数组 | Function， () => {} | 无 |
@@ -38,10 +36,23 @@
 | :------: | ----- | :------: | :------: |
 | line | 内部乡镇边界贴图 | String | 无 |
 | pillar | 柱子贴图 | String | 无 |
-| bottom | 底部贴图 | String | 无 |
-| top | 上表面贴图 | String | 无 |
-| select | 鼠标移入时贴图 | String | 无 |
-* 注：这里的值都是颜色字符串，hex、十六进制都行，不传就是黑的。
+| border | 边缘边界贴图 | String | 无 |
+| top | 顶面贴图 | String | 无 |
+| bottom | 底面贴图 | String | 无 |
+| select | 鼠标移入时，整个板块贴图 | String | 无 |
+* 这里的值都是颜色字符串，hex、十六进制都行，不传就是黑的。
+
+# 模型数据说明
+假设模型的区域是浙江省，板块名字叫hangzhou
+* 板块是杭州市这一块所在的区域，然后宁波也算个板块，这么多板块拼成的东西叫模型，模型内部及板块内部用line区分边界，模型外部用_border区分边界
+* hangzhou是板块顶面的数据
+* hangzhou_bottom是板块底面的数据
+* line是杭州市下乡镇边界，目前的边界数据是所有乡镇边界都放一起的
+* top_border是模型顶面边界，bottom_border是模型底面边界  
+* hangzhou_pillar是板块中心的柱子
+* 换句话说，obj文件里的名字只能是line、top_border、bottom_border、 、_bottom、_pillar，别的咱不管
+  
+嚷嚷这么多东西，其实用到的可能就只有改变材质的时候会用到这些概念
 
 ## data
 | 参数 | 说明 | 类型 | 默认值 |

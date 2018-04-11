@@ -28,7 +28,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
     
     var clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
     var clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
-    // 多次用到容器节点，所以存到全局变量里方便调用
+    // 多次用到容器节点，存到全局变量里方便调用
     var container = {};
 
     // 初始化three渲染三要素
@@ -36,6 +36,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
     // 默认配置
     var config = {};
 
+    // 初始化开场动画前板块位置
     function _initAreaPosition(area, child) {
         var p = _startPositions[area];
         if(!p) {
@@ -49,19 +50,19 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         child.position.set(p.x, p.y, p.z);
     }
 
+    // 预处理开场动画前的数据
     function _dealObjectInLoadCirculStart(child, visible) {
         if(!child.name) {
             return;
         }
-        if(/^(\w*_border)|(china_\w*)$/.test(child.name)) {
+        // 设置上下边界是否显示
+        if(/border$/.test(child.name)) {
             child.visible = visible;
         }
 
         if(child instanceof THREE.Mesh) {
             var area = child.name.split('_')[0];
-            if(area !== "china") {
-                _initAreaPosition(area, child);
-            }
+            _initAreaPosition(area, child);
         }
     }
 
@@ -73,7 +74,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
     function _changeModel4DataRefresh(child, divisor) {
         var name = child.name;
         
-        if(/_pillar$/.test(name)) {
+        if(/pillar$/.test(name)) {
             var dmName = name.split('_')[0];
             var data = child.userData.val;
             if(dmName) {
@@ -94,7 +95,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                 }
             } else {
                 dmName = name ? name.split("_")[0] : '';
-                // TODO 与上面height<=0重复，代码需精简
+                // TODO 与上面height <= 0重复，代码需精简
                 child.visible = false;
             }
         }
@@ -180,12 +181,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
      * @param config 模型配置文件
      * @param object .obj文件，所有模型数据。这里得注意跟child的区别，变量名写惯了都是object..
      */
-    function _initListener(config, object, dom) {
-        dom.addEventListener('mousemove', function(e) {
+    function _initListener(config, object) {
+        container.addEventListener('mousemove', function(e) {
             return _setMeshHighLightStatus(e, config);
         }, false);
 
-        dom.addEventListener('click', function(e) {
+        container.addEventListener('click', function(e) {
             return _showDetail(e, object, config);
         }, false);
     };
@@ -210,18 +211,20 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                 return;
             }else {
                 if(!uuid){ // 第一次
-                    if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
+                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)){
                         _current = child;
                         
                         child.material.color.set(texture.select);
                     }
                 }else {
-                    if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
+                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)){
+                        // 鼠标移开设置原先表面的颜色
                         _current.material.color.set(texture.top);
     
                         _old = _current;
                         _current = child;
                         
+                        // 鼠标移入设置移入的颜色
                         child.material.color.set(texture.select);
                     }
                 }
@@ -240,6 +243,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         var child = intersected.object;
 
         if(child) {
+            console.log(child.name)
             // 右侧表格数据的显示
             if(config.show_table) {
                 config.show_table(child);
@@ -290,17 +294,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         offset.left += node.offsetLeft;
 
         return _getOffset(node.parentNode, offset); // 向上累加offset里的值
-    }
-
-    /** 
-     * @param flag 是否显示边界
-     * @param perfix 模型文件中边界名称
-    */
-    function _setBorderVisible(child, flag, prefix) {
-        if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
-            // 开场动画完成后显示地图边界
-            child.name.slice(0, prefix.length) === prefix && (child.visible = flag);
-        }
     }
 
     /**
@@ -362,7 +355,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
             // 改变模型贴图
             switch(last_name) {
-                case 'Line': // 内部乡镇边界贴图
+                case 'line': // 内部乡镇边界贴图
                     child.material.color.set(texture.line);
                 break;
 
@@ -371,14 +364,17 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                     // child.material.map = new THREE.TextureLoader().load("../assets/texture/crate.jpg");
                 break;
 
-                case 'bottom': // 底部贴图
+                case 'bottom': // 底面贴图
                     child.material.color.set(texture.bottom);
                 break;
-            }
 
-            if(name.length == 1) { // 上层表面贴图
-                child.material.color.set(texture.top);
-                // child.material.opacity = 0.1;
+                case 'border': // 边缘边界贴图
+                    child.material.color.set(texture.border);
+                break;
+
+                default: // 顶面贴图
+                    child.material.color.set(texture.top);
+                break;
             }
         }
     }
@@ -432,7 +428,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         一种是旋转mesh，一种是改变相机位置
         这是旋转mesh
     */
-    function _afterMovementMesh(root, scene, camera, renderer) {
+    function _afterMovementMesh() {
         // 旋转速度
         var speed = 0.02;
 
@@ -504,56 +500,49 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                         }
                         if(child instanceof THREE.Mesh) {
                             child.geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
-                        }else if(child instanceof THREE.Line){
+                        }else if(child instanceof THREE.Line) {
                             console.log(child.name)
                         }
 
                         _set_material(child, _config);
 
                         // 初始化动画参数
-                        _dealObjectInLoadCirculStart(child, _config.bottom_border_visible);
-                        if(child.material) {
-                            child.initialMaterial = child.material.clone();
-                        }
+                        _dealObjectInLoadCirculStart(child, _config.border_visible);
         
                         // 开始动画
                         var name = child.name.split('_');
                         var last_name = name[name.length - 1];
                         var area = name[0];
                         
-                        if(area !== "china") {
-                            if(!_startPositions[area]) {
-                                return;
-                            }
-        
-                            // 定义各板块移动速度
-                            var time = _startPositions[area].time;
-                            if(!time) {
-                                if(_config.mesh_shift_time){
-                                    time = _startPositions[area].time = _config.mesh_shift_time(time);
-                                }else {
-                                    time = 2000;
-                                }
-                            }
-        
-                            // 开始动画
-                            _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
-                                _startTweenCount--;
-                                if(_startTweenCount === 0) {
-                                    // 渲染柱子
-                                    object.traverse(function(child) {
-                                        _changeModel4DataRefresh(child, _config.divisor);
-
-                                        _setBorderVisible(child, _config.top_border_visible, _config.top_border_prefix);
-                                    });
-                                    _afterMovementMesh(root, scene, camera, renderer);
-
-                                    // 绑定事件，比如鼠标移到板块上高亮
-                                    _initListener(_config, object, container);
-                                }
-                            });
-                            _startTweenCount++;
+                        if(!_startPositions[area]) {
+                            return;
                         }
+    
+                        // 定义各板块移动速度
+                        var time = _startPositions[area].time;
+                        if(!time) {
+                            if(_config.mesh_shift_time){
+                                time = _startPositions[area].time = _config.mesh_shift_time(time);
+                            }else {
+                                time = 2000;
+                            }
+                        }
+    
+                        // 开始动画
+                        _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
+                            _startTweenCount--;
+                            if(_startTweenCount === 0) {
+                                // 渲染柱子
+                                object.traverse(function(child) {
+                                    _changeModel4DataRefresh(child, _config.divisor);
+                                });
+                                _afterMovementMesh();
+
+                                // 绑定事件，比如鼠标移到板块上高亮
+                                _initListener(_config, object, container);
+                            }
+                        });
+                        _startTweenCount++;
                     });
         
                     function render(){

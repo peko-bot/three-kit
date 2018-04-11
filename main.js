@@ -14,20 +14,19 @@ require(['three', 'trunk'], function(THREE, Trunk){
     Trunk.init({
         container: document.getElementById('container'), // 画布挂载节点
         clear_color: 0x4584b4, // 画布颜色
-        top_border_visible: true, // 是否显示上边界
-        bottom_border_visible: false, // 是否显示下边界
-        top_border_prefix: 'deqing', // 模型文件中边界名称
         // mesh_shift_time: function(time) { // 定义各板块移动速度
         //     var duration = 1000;
 
         //     return Math.random() * duration * 5 + duration;
         // },
+        border_visible: true, // 边界是否显示
         divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
         texture: {
             line: '#045AAF', // 内部乡镇边界贴图
             pillar: '#1E8FF7', // 柱子贴图
-            bottom: '#0E2C6A', // 底部贴图
-            top: '#F96', // 上表面贴图
+            top: '#303471', // 上表面贴图
+            bottom: '#000', // 底部贴图
+            border: '#EBC9AE', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
         light: function() {
@@ -38,8 +37,8 @@ require(['three', 'trunk'], function(THREE, Trunk){
             lights.push(ambientLight);
             // 创建定向光源
             var directionalLight = new THREE.DirectionalLight(0xffeedd);
-            // 指定定向光源由z正半轴射向原点（平行光从屏幕外射向屏幕中心）
-            directionalLight.position.set(0, 0, 1);
+            // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
+            directionalLight.position.set(-2, -2, 1);
             lights.push(directionalLight)
 
             return lights;
@@ -85,7 +84,7 @@ require(['three', 'trunk'], function(THREE, Trunk){
         },
         controls: { // 轨道控制参数
             enableDamping: true, // 使动画循环使用时阻尼或自转，意思是否有惯性
-            enableZoom: false, // 是否可以缩放
+            enableZoom: true, // 是否可以缩放
             enabled: true, // 是否启用轨道控制
         }
     });

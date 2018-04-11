@@ -4,7 +4,7 @@
 mtllib deqing03.mtl
 
 #
-# object china_bottom_border
+# object bottom_border
 #
 
 v  20.4913 -10.1548 -0.4904
@@ -1651,7 +1651,7 @@ vn -0.0015 0.0011 -1.0000
 vn -0.8009 0.5987 0.0000
 # 724 vertex normals
 
-g china_bottom_border
+g bottom_border
 usemtl wire_143225087
 s 257
 f 1//1 2//1 3//2 4//2 
@@ -3488,7 +3488,7 @@ f 3//8 8//8 916//97 914//97
 # 916 polygons
 
 #
-# object deqing_top_border
+# object top_border
 #
 
 v  20.4913 -10.1548 2.7157
@@ -5109,7 +5109,7 @@ vn 0.8009 -0.5987 -0.0088
 vn -0.8009 0.5987 0.0000
 # 698 vertex normals
 
-g deqing_top_border
+g top_border
 usemtl wire_143225087
 s 257
 f 917//725 918//725 919//726 920//726 
@@ -6994,7 +6994,7 @@ f 1834/4/1428 1833/1/1428 1837/2/1428 1840/3/1428
 #
 
 #
-# object deqing_Line
+# object line
 #
 
 v  -32.9861 12.3158 2.8460
@@ -10005,7 +10005,7 @@ vn -0.0503 -0.9987 0.0000
 vn -0.0830 0.9966 0.0000
 # 1532 vertex normals
 
-g deqing_Line
+g line
 usemtl wire_153228184
 s 257
 f 1841//1429 1842//1429 1843//1430 1844//1430 
