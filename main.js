@@ -12,6 +12,7 @@ require.config({
 require(['three', 'trunk'], function(THREE, Trunk){
     var Trunk = new Trunk();
     Trunk.init({
+        container: document.getElementById('container'), // 画布挂载节点
         clear_color: 0x4584b4, // 画布颜色
         top_border_visible: true, // 是否显示上边界
         bottom_border_visible: false, // 是否显示下边界
@@ -21,12 +22,12 @@ require(['three', 'trunk'], function(THREE, Trunk){
 
         //     return Math.random() * duration * 5 + duration;
         // },
-        divisor: 12000,
+        divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
         texture: {
             line: '#045AAF', // 内部乡镇边界贴图
             pillar: '#1E8FF7', // 柱子贴图
             bottom: '#0E2C6A', // 底部贴图
-            top: '#000', // 上表面贴图
+            top: '#F96', // 上表面贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
         light: function() {
@@ -47,10 +48,22 @@ require(['three', 'trunk'], function(THREE, Trunk){
             materials: './data/model/deqing.mtl',
             objects: './data/model/deqing.obj',
             business: './data/simulation.json',
-            business_callback: function(response) {
-                var result = response.json();
-
-                return result;
+            business_callback: function(result, object) { // 处理业务数据和模型数据，使板块和表格数据对应
+                for(var i = 0; i < result.length; i++) {
+                    var item = result[i];
+        
+                    for(var j = 0; j < object.children.length; j++){
+                        var jtem = object.children[j];
+        
+                        if(item.stcd == jtem.name.split('_')[0]){
+                            /* 
+                                这个userData很关键，
+                                点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
+                            */
+                            jtem.userData = item;
+                        }
+                    }
+                }
             },
         },
         show_table: function(child) {

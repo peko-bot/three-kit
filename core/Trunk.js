@@ -1,61 +1,50 @@
-define([
-    'three',
-    'mtl-loader',
-    'obj-loader',
-    'orbitControls',
-    'tween',
-], function (THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN) {
+/**
+* @version 0.0.1 
+* @module Trunk
+* @author: zy9
+* @since: 2018-03-11 10:19:50
+*/
+define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN) {
+    // 实例对象
+    var Trunk = function() {}
     // 初始化参数
-    this._startPositions = {};
-    this._startTweenCount = 0;
+    var _startPositions = {};
+    var _startTweenCount = 0;
     // 柱子高度变化的定时器
-    this._intervals = {};
+    var _intervals = {};
     // 鼠标移入板块高亮
-    this._old = {};
-    this._current = {};
+    var _old = {};
+    var _current = {};
     /* 
         渲染模型容器,相当于对div进行appendChild
         这里具体干的是往scene里加Object3D，然后所有模型都放在Object3D对象里
         原因是scene上不能直接渲染Mesh啊Group之类的对象，需要这么个载体
     */
-    this.root = {};
+    var root = {};
+    // 标识模型是否移动过
+    var _withdrawPosition = false;
+    // 处理模型移动的方法
+    var _meshTween = null;
     
     var clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
     var clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
-    var container = document.getElementById('container');
-
     // 多次用到容器节点，所以存到全局变量里方便调用
-    this._container = container;
+    var container = {};
 
     // 初始化three渲染三要素
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setSize(clientWidth, clientHeight - 4);
-    container.appendChild(renderer.domElement);
-
-    var scene = new THREE.Scene();
-
-    // 相机视锥体的长宽比
-    var _camera_aspect = clientWidth / clientHeight;
-    var camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
-    camera.position.z = 100;
-    scene.add(camera);
-
-    this.renderer = renderer;
-    this.camera = camera;
-    this.scene = scene;
-
-    // 加载模型数据
-    var mtlLoader = new THREE.MTLLoader();
+    var camera, renderer, scene;
+    // 默认配置
+    var config = {};
 
     function _initAreaPosition(area, child) {
-        var p = this._startPositions[area];
-        if (!p) {
+        var p = _startPositions[area];
+        if(!p) {
             p = {
                 x: Math.random() * 1000 - 500,
                 y: Math.random() * 1000 - 500,
                 z: Math.random() > 0.5 ? (Math.random() * 200 + 300) : (-Math.random() * 500 - 1000)
             };
-            this._startPositions[area] = p;
+            _startPositions[area] = p;
         }
         child.position.set(p.x, p.y, p.z);
     }
@@ -64,16 +53,13 @@ define([
         if(!child.name) {
             return;
         }
-        child.receiveShadow = this._shadow;
-        if (/_pillar$/.test(child.name)) {
-            child.castShadow = this._shadow;
-        } else if (/^(\w*_border)|(china_\w*)$/.test(child.name)) {
+        if(/^(\w*_border)|(china_\w*)$/.test(child.name)) {
             child.visible = visible;
         }
 
-        if (child instanceof THREE.Mesh) {
+        if(child instanceof THREE.Mesh) {
             var area = child.name.split('_')[0];
-            if (area !== "china") {
+            if(area !== "china") {
                 _initAreaPosition(area, child);
             }
         }
@@ -87,14 +73,14 @@ define([
     function _changeModel4DataRefresh(child, divisor) {
         var name = child.name;
         
-        if (/_pillar$/.test(name)) {
+        if(/_pillar$/.test(name)) {
             var dmName = name.split('_')[0];
             var data = child.userData.val;
             if(dmName) {
                 var height = 0;
                 var proportion = 0;
 
-                if (divisor && 0 !== divisor) {
+                if(divisor && 0 !== divisor) {
                     proportion = data / divisor;
                     height = proportion * 15;
                 }
@@ -129,21 +115,21 @@ define([
         var times = 300;
 
         function show() {
-            if (i < times) {
+            if(i < times) {
                 var h = Math.floor(height * i / times);
                 _setHeight(child, h);
                 i++;
-            } else if (i === times) {
+            } else if(i === times) {
                 i++;
                 _setHeight(child, height);
             } else {
                 clearInterval(sh);
-                delete this._intervals[sh];
+                delete _intervals[sh];
             }
         }
 
-        sh = setInterval(show, this._hightslowinterval);
-        this._intervals[sh] = sh;
+        sh = setInterval(show, function() {});
+        _intervals[sh] = sh;
     };
     
     /**
@@ -154,7 +140,7 @@ define([
      * @private
      */
     function _setHeight(child, height) {
-        if (height === 0 || isNaN(height)) {
+        if(height === 0 || isNaN(height)) {
             // 不能高度设置为0，否则下一次设置的时候会出问题，
             height = 1;
         }
@@ -175,14 +161,14 @@ define([
         var minz = vertices[0].z;
         for (var i = 1, size = vertices.length; i < size; i++) {
             var z = vertices[i].z;
-            if (minz != z) {
+            if(minz != z) {
                 minz = Math.min(z, minz);
                 break;
             }
         }
         for (var i = 0, size = vertices.length; i < size; i++) {
             var vertice = vertices[i];
-            if (vertice.z !== minz) {
+            if(vertice.z !== minz) {
                 vertice.z = minz + height;
             }
         }
@@ -219,22 +205,22 @@ define([
 
         // 设置/移除高亮
         if(child) {
-            var uuid = this._current && this._current.uuid;
+            var uuid = _current && _current.uuid;
             if(uuid === child.uuid) {
                 return;
             }else {
                 if(!uuid){ // 第一次
                     if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
-                        this._current = child;
+                        _current = child;
                         
                         child.material.color.set(texture.select);
                     }
                 }else {
                     if(!/_border$/.test(child.name) && !/_bottom$/.test(child.name) && !/_Line$/.test(child.name) && !/_pillar$/.test(child.name)){
-                        this._current.material.color.set(texture.top);
+                        _current.material.color.set(texture.top);
     
-                        this._old = this._current;
-                        this._current = child;
+                        _old = _current;
+                        _current = child;
                         
                         child.material.color.set(texture.select);
                     }
@@ -246,9 +232,7 @@ define([
         }
     }
 
-    /* 
-        点击板块，板块左移，右边空出来的地方显示表格
-    */
+    // 点击板块，板块左移，右边空出来的地方显示表格
     function _showDetail(event, object, config) {
         event.preventDefault();
 
@@ -266,24 +250,23 @@ define([
 
     // 获得鼠标位置的板块模型对象
     function _objectFromMouse(pagex, pagey) {
-        var offset = _getOffset(this.renderer.domElement);
+        var offset = _getOffset(renderer.domElement);
         var eltx = pagex - offset.left;
         var elty = pagey - offset.top;
-        var container = this._container;
 
         var vpx = (eltx / container.offsetWidth) * 2 - 1;
         var vpy = -(elty / container.offsetHeight) * 2 + 1;
         var vector = new THREE.Vector2(vpx, vpy);
         var raycaster = new THREE.Raycaster();
 
-        raycaster.setFromCamera(vector, this.camera);
+        raycaster.setFromCamera(vector, camera);
 
-        var intersects = raycaster.intersectObjects(this.root.children, true);
+        var intersects = raycaster.intersectObjects(root.children, true);
 
         var len = intersects.length;
-        if (len > 0) {
+        if(len > 0) {
             var intersect = intersects[0];
-            if (intersect) {
+            if(intersect) {
                 return intersect;
             }
         }
@@ -293,13 +276,13 @@ define([
 
     // 获得元素相对整个页面的偏移量
     function _getOffset(node, offset) {
-        if (!offset) {
+        if(!offset) {
             offset = {};
             offset.top = 0;
             offset.left = 0;
         }
 
-        if (node == document.body) { // 当该节点为body节点时，结束递归
+        if(node == document.body) { // 当该节点为body节点时，结束递归
             return offset;
         }
 
@@ -314,7 +297,7 @@ define([
      * @param perfix 模型文件中边界名称
     */
     function _setBorderVisible(child, flag, prefix) {
-        if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+        if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
             // 开场动画完成后显示地图边界
             child.name.slice(0, prefix.length) === prefix && (child.visible = flag);
         }
@@ -331,31 +314,30 @@ define([
     function _meshMove(withdraw, object) {
         var point = { x: 0, y: 0, z: 0 };
         var rotation = { x: -Math.PI / 4, y: 0, z: 0 };
-        var root = this.root.rotation;
 
-        if (withdraw) {
+        if(withdraw) {
             rotation = { x: -Math.PI / 4, y: Math.PI / 180 * 10, z: 0 };
             
             // 默认配比是500 * 300的设置
-            var gap = this._container.clientWidth / 550;
+            var gap = container.clientWidth / 550;
             // 算移开的位置，移开的位置是固定的，只算一遍
-            if (!this._withdrawPosition) {
-                this._withdrawPosition = _getCoordinate2InScene({
+            if(!_withdrawPosition) {
+                _withdrawPosition = _getCoordinate2InScene({
                     x: 30 * gap,
-                    y: this.renderer.domElement.offsetHeight / 2
-                }, this.camera, this.renderer.domElement);
+                    y: renderer.domElement.offsetHeight / 2
+                }, camera, renderer.domElement);
 
                 // x 的位置需要加上模型宽的一半，避免飞出
-                this._withdrawPosition.x += getMeshWidth(object) / 2;
+                _withdrawPosition.x += getMeshWidth(object) / 2;
             }
-            point = this._withdrawPosition;
+            point = _withdrawPosition;
         }
 
-        if (this._meshTween) {
-            TWEEN.remove(this._meshTween);
-            this._meshTween = null;
+        if(_meshTween) {
+            TWEEN.remove(_meshTween);
+            _meshTween = null;
         }
-        this._meshTween = _tweenInOut(object.position, { x: point.x, y: 0, z: 0 }, 1000);
+        _meshTween = _tweenInOut(object.position, { x: point.x, y: 0, z: 0 }, 1000);
     };
     
     // 获得模型宽度
@@ -372,7 +354,7 @@ define([
     }
 
     function _set_material(child, config) {
-        if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+        if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
             var name = child.name.split('_');
             var last_name = name[name.length - 1];
 
@@ -458,7 +440,7 @@ define([
             requestAnimationFrame(rotateAnimate);
             
             // y轴正半轴朝上
-            // this.root.position.y <= 0 ? this.root.position.y += 0.8 : null;
+            // root.position.y <= 0 ? root.position.y += 0.8 : null;
             // 沿x轴旋转
             root.rotation.x >= -Math.PI / 4 ? root.rotation.x -= speed : null;
             renderer.render(scene, camera);
@@ -467,7 +449,25 @@ define([
         rotateAnimate();
     }
 
-    var init = function(_config) {
+    Trunk.prototype.init = function(_config) {
+        _config = Object.assign(config, _config);
+        // 挂载画布的dom
+        container = _config.container;
+        
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(clientWidth, clientHeight - 4);
+        container.appendChild(renderer.domElement);
+
+        scene = new THREE.Scene();
+
+        // 相机视锥体的长宽比
+        var _camera_aspect = clientWidth / clientHeight;
+        camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
+        camera.position.z = 100;
+        scene.add(camera);
+
+        // 加载模型数据
+        var mtlLoader = new THREE.MTLLoader();
         // 初始化轨道控制
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
         Object.assign(controls, _config.controls);
@@ -488,33 +488,31 @@ define([
 
             objLoader.setMaterials(materials);
             objLoader.load(_config.data.objects, function(object) {
-                this.root = new THREE.Object3D().add(object);
+                root = new THREE.Object3D().add(object);
                 scene.add(root);
 
                 // 请求业务数据
                 fetch(_config.data.business).then(function(response) {
-                    if(_config.data.business_callback){
-                        return _config.data.business_callback(response);
-                    }
                     return response.json();
                 }).then(function(result) {
+                    // 处理数据回调
+                    _config.data.business_callback && _config.data.business_callback(result, object);
+
                     object.traverse(function(child) {
-                        if (child instanceof THREE.Group) {
+                        if(child instanceof THREE.Group) {
                             return;
                         }
-                        if (child instanceof THREE.Mesh) {
+                        if(child instanceof THREE.Mesh) {
                             child.geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
-                        } else {
-                            if (child instanceof THREE.Line) {
-                                child.material.lights = false;
-                            }
+                        }else if(child instanceof THREE.Line){
+                            console.log(child.name)
                         }
 
                         _set_material(child, _config);
 
                         // 初始化动画参数
                         _dealObjectInLoadCirculStart(child, _config.bottom_border_visible);
-                        if (child.material) {
+                        if(child.material) {
                             child.initialMaterial = child.material.clone();
                         }
         
@@ -523,46 +521,27 @@ define([
                         var last_name = name[name.length - 1];
                         var area = name[0];
                         
-                        if (area !== "china") {
-                            if(!this._startPositions[area]) {
+                        if(area !== "china") {
+                            if(!_startPositions[area]) {
                                 return;
                             }
         
                             // 定义各板块移动速度
-                            var time = this._startPositions[area].time;
+                            var time = _startPositions[area].time;
                             if(!time) {
                                 if(_config.mesh_shift_time){
-                                    time = this._startPositions[area].time = _config.mesh_shift_time(time);
+                                    time = _startPositions[area].time = _config.mesh_shift_time(time);
                                 }else {
                                     time = 2000;
                                 }
                             }
         
                             // 开始动画
-                            _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function () {
-                                this._startTweenCount--;
-                                if (this._startTweenCount === 0) {
-                                    // 处理业务数据和模型数据，使之一一对应
-                                    for(var i = 0; i < result.length; i++) {
-                                        var item = result[i];
-
-                                        for(var j = 0; j < object.children.length; j++){
-                                            var jtem = object.children[j];
-
-                                            /* 
-                                                如果加上正则验证，也就是非柱子的模型数据userData为空时，传到表格那边就会为空
-                                                在点击板块时是根据鼠标点击位置获得对象的，也就是说如果不点柱子是不会有数据的
-                                                待修正 mark
-                                            */
-                                            // if(item.stcd == jtem.name.split('_')[0] && /_pillar$/.test(jtem.name)){
-                                            if(item.stcd == jtem.name.split('_')[0]){
-                                                jtem.userData = item;
-                                            }
-                                        }
-                                    }
-
+                            _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
+                                _startTweenCount--;
+                                if(_startTweenCount === 0) {
                                     // 渲染柱子
-                                    object.traverse(function (child) {
+                                    object.traverse(function(child) {
                                         _changeModel4DataRefresh(child, _config.divisor);
 
                                         _setBorderVisible(child, _config.top_border_visible, _config.top_border_prefix);
@@ -572,8 +551,8 @@ define([
                                     // 绑定事件，比如鼠标移到板块上高亮
                                     _initListener(_config, object, container);
                                 }
-                            }.bind(this));
-                            this._startTweenCount++;
+                            });
+                            _startTweenCount++;
                         }
                     });
         
@@ -588,7 +567,5 @@ define([
         });
     };
 
-    return function() {
-        this.init = init;
-    };
+    return Trunk;
 })
