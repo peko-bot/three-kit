@@ -148,10 +148,11 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         var geometry = child.geometry;
 
         geometry.verticesNeedUpdate = true;
+
         var vertices = geometry.vertices;
 
         /* 
-            此处应该当有掌声，当然可能写的人的特有感慨
+            此处应该当有掌声，当然可能是写的人的特有感慨
             这里区分了顶面和底面的点，前提是给的模型数据里的柱子高度不能为0
 
             下面这段代码看上去简单，但领悟到顶面和底面不能在同一个面上,否则就区分不出的痛整整花了一天时间
@@ -174,6 +175,16 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
             }
         }
     };
+
+    // 实时渲染
+    function _flush() {
+        function render(){
+            requestAnimationFrame(render);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }
+        render();
+    }
     
     /**
      * 事件绑定
@@ -214,6 +225,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                     if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)){
                         _current = child;
                         
+                        // 鼠标移入设置移入的颜色
                         child.material.color.set(texture.select);
                     }
                 }else {
@@ -230,8 +242,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                 }
 
             }
-        }else { // 重置所有板块材质
-            
         }
     }
 
@@ -243,7 +253,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         var child = intersected.object;
 
         if(child) {
-            console.log(child.name)
             // 右侧表格数据的显示
             if(config.show_table) {
                 config.show_table(child);
@@ -267,8 +276,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
         var intersects = raycaster.intersectObjects(root.children, true);
 
-        var len = intersects.length;
-        if(len > 0) {
+        if(intersects.length > 0) {
             var intersect = intersects[0];
             if(intersect) {
                 return intersect;
@@ -346,6 +354,28 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         return length;
     }
 
+    // 定义各板块移动速度
+    function _handle_model_shift(child, _config) {
+        var name = child.name.split('_');
+        var last_name = name[name.length - 1];
+        var area = name[0];
+        
+        if(!_startPositions[area]) {
+            return;
+        }
+        
+        var time = _startPositions[area].time;
+        if(!time) {
+            if(_config.mesh_shift_time){
+                time = _startPositions[area].time = _config.mesh_shift_time(time);
+            }else {
+                time = 2000;
+            }
+        }
+
+        return time;
+    }
+
     function _set_material(child, config) {
         if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
             var name = child.name.split('_');
@@ -414,12 +444,9 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         var tween = new TWEEN.Tween(a)
             .to(b, t)
             .easing(TWEEN.Easing.Exponential.InOut);
-        if(c) {
-            tween.onComplete(c);
-        }
-        if(s) {
-            tween.onStart(s);
-        }
+
+        c && tween.onComplete(c);
+        s && tween.onStart(s);
         return tween.start();
     };
 
@@ -429,10 +456,10 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         这是旋转mesh
     */
     function _afterMovementMesh() {
-        // 旋转速度
+        // 视角转动速度
         var speed = 0.02;
 
-        var rotateAnimate = function(){
+        var rotateAnimate = function() {
             requestAnimationFrame(rotateAnimate);
             
             // y轴正半轴朝上
@@ -449,25 +476,24 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         _config = Object.assign(config, _config);
         // 挂载画布的dom
         container = _config.container;
-        
-        renderer = new THREE.WebGLRenderer();
-        renderer.setSize(clientWidth, clientHeight - 4);
-        container.appendChild(renderer.domElement);
-
-        scene = new THREE.Scene();
 
         // 相机视锥体的长宽比
         var _camera_aspect = clientWidth / clientHeight;
         camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
         camera.position.z = 100;
+        
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(clientWidth, clientHeight - 4);
+
+        container.appendChild(renderer.domElement);
+
+        scene = new THREE.Scene();
         scene.add(camera);
 
-        // 加载模型数据
-        var mtlLoader = new THREE.MTLLoader();
         // 初始化轨道控制
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
         Object.assign(controls, _config.controls);
-
+        
         // 初始化光线
         if(_config.light){
             var lights = _config.light();
@@ -475,10 +501,13 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                 scene.add(lights[i]);
             }
         }
-
+        
         // 设置背景颜色
         _config.clear_color && renderer.setClearColor(_config.clear_color);
 
+        // 加载模型数据
+        var mtlLoader = new THREE.MTLLoader();
+        
         mtlLoader.load(_config.data.materials, function(materials) {
             var objLoader = new THREE.OBJLoader();
 
@@ -509,24 +538,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                         // 初始化动画参数
                         _dealObjectInLoadCirculStart(child, _config.border_visible);
         
-                        // 开始动画
-                        var name = child.name.split('_');
-                        var last_name = name[name.length - 1];
-                        var area = name[0];
-                        
-                        if(!_startPositions[area]) {
-                            return;
-                        }
-    
-                        // 定义各板块移动速度
-                        var time = _startPositions[area].time;
-                        if(!time) {
-                            if(_config.mesh_shift_time){
-                                time = _startPositions[area].time = _config.mesh_shift_time(time);
-                            }else {
-                                time = 2000;
-                            }
-                        }
+                        var time = _handle_model_shift(child, _config);
     
                         // 开始动画
                         _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
@@ -545,12 +557,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                         _startTweenCount++;
                     });
         
-                    function render(){
-                        requestAnimationFrame(render);
-                        TWEEN.update();
-                        renderer.render(scene, camera);
-                    }
-                    render();
+                    _flush();
                 });
             });
         });

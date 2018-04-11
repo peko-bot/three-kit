@@ -29,20 +29,7 @@ require(['three', 'trunk'], function(THREE, Trunk){
             border: '#EBC9AE', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
-        light: function() {
-            var lights = [];
-
-            // 创建环境光
-            var ambientLight = new THREE.AmbientLight(0xaaaaaa);
-            lights.push(ambientLight);
-            // 创建定向光源
-            var directionalLight = new THREE.DirectionalLight(0xffeedd);
-            // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
-            directionalLight.position.set(-2, -2, 1);
-            lights.push(directionalLight)
-
-            return lights;
-        },
+        light: initLight,
         data: {
             materials: './data/model/deqing.mtl',
             objects: './data/model/deqing.obj',
@@ -119,4 +106,42 @@ require(['three', 'trunk'], function(THREE, Trunk){
 
         element.innerHTML += table + decorate;
     };
+
+    // 初始化光线
+    function initLight() {
+        var lights = [];
+
+        // // 创建环境光
+        // var ambientLight = new THREE.AmbientLight(0xaaaaaa);
+        // lights.push(ambientLight);
+        // // 创建定向光源
+        // var directionalLight = new THREE.DirectionalLight(0xffeedd);
+        // // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
+        // directionalLight.position.set(-2, -2, 1);
+        // lights.push(directionalLight)
+        lights.push(new THREE.HemisphereLight(16777215, 16777215, 0.3));
+
+        var light1 = new THREE.DirectionalLight(16777215, 0.85);
+        light1.position.set(-150, 25, 50);
+        lights.push(light1);
+
+        var light2 = new THREE.DirectionalLight(16777215, 0.85);
+        light2.position.set(-100, 250, 50);
+        lights.push(light2);
+
+        var spotLight = new THREE.SpotLight('white', 8, 250, 0.44, 1, 2);
+        spotLight.position.set(-60, -30, 140);
+        spotLight.angle = -Math.PI / 4;
+        lights.push(spotLight);
+
+        var spotLight2 = new THREE.SpotLight(16777215, 1);
+        spotLight2.position.set(-100, 200, 20);
+        spotLight2.angle = Math.PI / 4;
+        spotLight2.penumbra = 0.05;
+        spotLight2.decay = 1.5;
+        spotLight2.distance = 1000;
+        lights.push(spotLight2);
+
+        return lights;
+    }
 });
