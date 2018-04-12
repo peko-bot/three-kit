@@ -9,7 +9,7 @@ require.config({
     },
 })
 
-require(['three', 'trunk'], function(THREE, Trunk){
+require(['three', 'trunk'], function(THREE, Trunk) {
     var Trunk = new Trunk();
     Trunk.init({
         container: document.getElementById('container'), // 画布挂载节点
@@ -29,6 +29,7 @@ require(['three', 'trunk'], function(THREE, Trunk){
             border: '#EBC9AE', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
+        set_texture: set_texture, // 手动设置实体贴图。该方法存在时，texture中只有select会生效
         light: initLight,
         data: {
             materials: './data/model/deqing.mtl',
@@ -38,10 +39,10 @@ require(['three', 'trunk'], function(THREE, Trunk){
                 for(var i = 0; i < result.length; i++) {
                     var item = result[i];
         
-                    for(var j = 0; j < object.children.length; j++){
+                    for(var j = 0; j < object.children.length; j++) {
                         var jtem = object.children[j];
         
-                        if(item.stcd == jtem.name.split('_')[0]){
+                        if(item.stcd == jtem.name.split('_')[0]) {
                             /* 
                                 这个userData很关键，
                                 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
@@ -52,7 +53,7 @@ require(['three', 'trunk'], function(THREE, Trunk){
                 }
             },
         },
-        show_table: function(child) {
+        show_detail: function(child) { // 这方法主要是把点击的模型传出来，具体要做什么自己写
             var detail = document.getElementById('detail');
 
             if (detail.children.length != 0) {
@@ -60,11 +61,11 @@ require(['three', 'trunk'], function(THREE, Trunk){
                     这里图省事就直接清空原先的children建新表了
                     实际上该去修改innerHTML，会省很多性能
                 */
-            for(var i = 0; i < detail.children.length; i++){
+            for(var i = 0; i < detail.children.length; i++) {
                 detail.removeChild(detail.children[i]);
             }
                 createTable(child, detail);
-            } else {
+            }else {
                 // 如果表格不存在，创建
                 createTable(child, detail);
             }
@@ -107,18 +108,13 @@ require(['three', 'trunk'], function(THREE, Trunk){
         element.innerHTML += table + decorate;
     };
 
-    // 初始化光线
+    /**
+     * 初始化光线
+     * x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
+     */
     function initLight() {
         var lights = [];
 
-        // // 创建环境光
-        // var ambientLight = new THREE.AmbientLight(0xaaaaaa);
-        // lights.push(ambientLight);
-        // // 创建定向光源
-        // var directionalLight = new THREE.DirectionalLight(0xffeedd);
-        // // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
-        // directionalLight.position.set(-2, -2, 1);
-        // lights.push(directionalLight)
         lights.push(new THREE.HemisphereLight(16777215, 16777215, 0.3));
 
         var light1 = new THREE.DirectionalLight(16777215, 0.85);
@@ -143,5 +139,49 @@ require(['three', 'trunk'], function(THREE, Trunk){
         lights.push(spotLight2);
 
         return lights;
+    }
+
+    /**
+     * 修改模型材质
+     * @param child 遍历所有模型对象时的回调 
+     */
+    function set_texture(child) {
+        if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
+            var name = child.name.split('_');
+            var last_name = name[name.length - 1];
+
+            var texture = {
+                line: '#045AAF', // 内部乡镇边界贴图
+                pillar: '#1E8FF7', // 柱子贴图
+                top: '#303471', // 上表面贴图
+                bottom: '#000', // 底部贴图
+                border: '#EBC9AE', // 边缘边界贴图
+                select: '#071C5B', // 鼠标移入时贴图
+            };
+
+            // 改变模型贴图
+            switch(last_name) {
+                case 'line': // 内部乡镇边界贴图
+                    child.material.color.set(texture.line);
+                break;
+
+                case 'pillar': // 柱子贴图
+                    child.material.color.set(texture.pillar);
+                    // child.material.map = new THREE.TextureLoader().load('../assets/texture/crate.jpg');
+                break;
+
+                case 'bottom': // 底面贴图
+                    child.material.color.set(texture.bottom);
+                break;
+
+                case 'border': // 边缘边界贴图
+                    child.material.color.set(texture.border);
+                break;
+
+                default: // 顶面贴图
+                    child.material.color.set(texture.top);
+                break;
+            }
+        }
     }
 });

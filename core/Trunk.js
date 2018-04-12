@@ -89,12 +89,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                 // 不支持负数，但万一传了负数，暂按0处理
                 if(height <= 0) {
                     child.visible = false;
-                } else {
+                }else {
                     _setHeightSlow(child, height);
                     child.visible = true;
                 }
-            } else {
-                dmName = name ? name.split("_")[0] : '';
+            }else {
+                dmName = name ? name.split('_')[0] : '';
                 // TODO 与上面height <= 0重复，代码需精简
                 child.visible = false;
             }
@@ -192,13 +192,13 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
      * @param config 模型配置文件
      * @param object .obj文件，所有模型数据。这里得注意跟child的区别，变量名写惯了都是object..
      */
-    function _initListener(config, object) {
+    function _initListener(object) {
         container.addEventListener('mousemove', function(e) {
-            return _setMeshHighLightStatus(e, config);
+            return _setMeshHighLightStatus(e);
         }, false);
 
         container.addEventListener('click', function(e) {
-            return _showDetail(e, object, config);
+            return _showDetail(e, object);
         }, false);
     };
     
@@ -209,7 +209,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         移开后恢复原来的材质
         得注意边界线也是种模型，需要额外判断
     */
-    function _setMeshHighLightStatus(event, config) {
+    function _setMeshHighLightStatus(event) {
         var intersected = _objectFromMouse(event.pageX, event.pageY);
         var child = intersected.object;
 
@@ -246,7 +246,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
     }
 
     // 点击板块，板块左移，右边空出来的地方显示表格
-    function _showDetail(event, object, config) {
+    function _showDetail(event, object) {
         event.preventDefault();
 
         var intersected = _objectFromMouse(event.pageX, event.pageY);
@@ -254,8 +254,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
         if(child) {
             // 右侧表格数据的显示
-            if(config.show_table) {
-                config.show_table(child);
+            if(config.show_detail) {
+                config.show_detail(child);
                 _meshMove(true, object);
             }
         }
@@ -355,7 +355,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
     }
 
     // 定义各板块移动速度
-    function _handle_model_shift(child, _config) {
+    function _handle_model_shift(child) {
         var name = child.name.split('_');
         var last_name = name[name.length - 1];
         var area = name[0];
@@ -366,8 +366,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         
         var time = _startPositions[area].time;
         if(!time) {
-            if(_config.mesh_shift_time){
-                time = _startPositions[area].time = _config.mesh_shift_time(time);
+            if(config.mesh_shift_time){
+                time = _startPositions[area].time = config.mesh_shift_time(time);
             }else {
                 time = 2000;
             }
@@ -376,7 +376,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         return time;
     }
 
-    function _set_material(child, config) {
+    function _set_material(child) {
+        if(config.set_texture) {
+            config.set_texture(child);
+
+            return;
+        }
         if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
             var name = child.name.split('_');
             var last_name = name[name.length - 1];
@@ -391,7 +396,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
                 case 'pillar': // 柱子贴图
                     child.material.color.set(texture.pillar);
-                    // child.material.map = new THREE.TextureLoader().load("../assets/texture/crate.jpg");
+                    // child.material.map = new THREE.TextureLoader().load('../assets/texture/crate.jpg');
                 break;
 
                 case 'bottom': // 底面贴图
@@ -473,9 +478,9 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
     }
 
     Trunk.prototype.init = function(_config) {
-        _config = Object.assign(config, _config);
+        config = Object.assign(config, _config);
         // 挂载画布的dom
-        container = _config.container;
+        container = config.container;
 
         // 相机视锥体的长宽比
         var _camera_aspect = clientWidth / clientHeight;
@@ -492,36 +497,36 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
         // 初始化轨道控制
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
-        Object.assign(controls, _config.controls);
+        Object.assign(controls, config.controls);
         
         // 初始化光线
-        if(_config.light){
-            var lights = _config.light();
+        if(config.light){
+            var lights = config.light();
             for(var i = 0; i < lights.length; i++) {
                 scene.add(lights[i]);
             }
         }
         
         // 设置背景颜色
-        _config.clear_color && renderer.setClearColor(_config.clear_color);
+        config.clear_color && renderer.setClearColor(config.clear_color);
 
         // 加载模型数据
         var mtlLoader = new THREE.MTLLoader();
         
-        mtlLoader.load(_config.data.materials, function(materials) {
+        mtlLoader.load(config.data.materials, function(materials) {
             var objLoader = new THREE.OBJLoader();
 
             objLoader.setMaterials(materials);
-            objLoader.load(_config.data.objects, function(object) {
+            objLoader.load(config.data.objects, function(object) {
                 root = new THREE.Object3D().add(object);
                 scene.add(root);
 
                 // 请求业务数据
-                fetch(_config.data.business).then(function(response) {
+                fetch(config.data.business).then(function(response) {
                     return response.json();
                 }).then(function(result) {
                     // 处理数据回调
-                    _config.data.business_callback && _config.data.business_callback(result, object);
+                    config.data.business_callback && config.data.business_callback(result, object);
 
                     object.traverse(function(child) {
                         if(child instanceof THREE.Group) {
@@ -533,12 +538,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                             console.log(child.name)
                         }
 
-                        _set_material(child, _config);
+                        _set_material(child, config);
 
                         // 初始化动画参数
-                        _dealObjectInLoadCirculStart(child, _config.border_visible);
+                        _dealObjectInLoadCirculStart(child, config.border_visible);
         
-                        var time = _handle_model_shift(child, _config);
+                        var time = _handle_model_shift(child, config);
     
                         // 开始动画
                         _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
@@ -546,12 +551,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                             if(_startTweenCount === 0) {
                                 // 渲染柱子
                                 object.traverse(function(child) {
-                                    _changeModel4DataRefresh(child, _config.divisor);
+                                    _changeModel4DataRefresh(child, config.divisor);
                                 });
                                 _afterMovementMesh();
 
                                 // 绑定事件，比如鼠标移到板块上高亮
-                                _initListener(_config, object, container);
+                                _initListener(object);
                             }
                         });
                         _startTweenCount++;

@@ -8,7 +8,7 @@
 # 怎么看demo
   clone下来，部署到本地服务器，打开index.html即可  
     
-  比如我发布到IIS上，端口9005，最后在地址栏输入 http://locahost:9005 即可（IIS默认打开文件index.html） 
+  比如我发布到IIS上，端口9005，最后在地址栏输入 http://localhost:9005 即可（IIS默认打开文件index.html） 
     
   用法也在demo里，因为代码挺长就不贴了
 
@@ -26,9 +26,10 @@
 | border_visible | 是否显示上下边界 | Boolean | false |
 | mesh_shift_time | 定义各板块移动时间，单位毫秒 | Number | 2000 |
 | texture | 模型贴图，具体参数见下 | {} | 无 |
+| set_texture | 手动设置模型贴图。该方法存在时，texture中只有select会生效 | Function， (child) => {} | 无 |
 | light | 初始化光线，需要手动return光线实例数组 | Function， () => {} | 无 |
 | data | 加载模型及业务数据，具体参数见下 | {} | 无 |
-| show_table | 点击板块后显示在右侧的表格，这玩意完全开放，需要什么样式自己操作dom。没这个方法点击板块是没反应的 | Function， (child) => {} | 无 |
+| show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的 | Function， (child) => {} | 无 |
 | controls | 轨道控制参数。想看中文文档就去搜一下OrbitControls，直接一点就看./third/three/controls/OrbitControls | {} | 无 |
 
 ## texture
