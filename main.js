@@ -14,11 +14,11 @@ require(['three', 'trunk'], function(THREE, Trunk) {
     Trunk.init({
         container: document.getElementById('container'), // 画布挂载节点
         clear_color: 0x4584b4, // 画布颜色
-        // mesh_shift_time: function(time) { // 定义各板块移动速度
-        //     var duration = 1000;
+        mesh_shift_time: function(time) { // 定义各板块移动速度
+            var duration = 1000;
 
-        //     return Math.random() * duration * 5 + duration;
-        // },
+            return Math.random() * duration * 5 + duration;
+        },
         border_visible: true, // 边界是否显示
         divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
         texture: {
@@ -56,18 +56,22 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         show_detail: function(child) { // 这方法主要是把点击的模型传出来，具体要做什么自己写
             var detail = document.getElementById('detail');
 
-            if (detail.children.length != 0) {
-                /* 
-                    这里图省事就直接清空原先的children建新表了
-                    实际上该去修改innerHTML，会省很多性能
-                */
-            for(var i = 0; i < detail.children.length; i++) {
-                detail.removeChild(detail.children[i]);
-            }
-                createTable(child, detail);
-            }else {
-                // 如果表格不存在，创建
-                createTable(child, detail);
+            // 当点到边界或者柱子的时候不移动模型
+            if(Object.getOwnPropertyNames(child.userData).length != 0) {
+                if (detail.children.length != 0) {
+                    /* 
+                        这里图省事就直接清空原先的children建新表了
+                        实际上该去修改innerHTML，会省很多性能
+                    */
+                for(var i = 0; i < detail.children.length; i++) {
+                    detail.removeChild(detail.children[i]);
+                }
+                    createTable(child, detail);
+                }else {
+                    // 如果表格不存在，创建
+                    createTable(child, detail);
+                }
+                return true;
             }
         },
         controls: { // 轨道控制参数
@@ -79,7 +83,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
 
     // 创建表格元素
     function createTable(child, element) {
-        var data = child.userData;
+        var data = Object.assign({ stnm: '-', val: '-' }, child.userData);
         var table = '', decorate = '';
 
         table += 
@@ -155,7 +159,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 pillar: '#1E8FF7', // 柱子贴图
                 top: '#303471', // 上表面贴图
                 bottom: '#000', // 底部贴图
-                border: '#EBC9AE', // 边缘边界贴图
+                border: '#F96', // 边缘边界贴图
                 select: '#071C5B', // 鼠标移入时贴图
             };
 
@@ -166,12 +170,8 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
 
                 case 'pillar': // 柱子贴图
+                    // child.material.map = new THREE.TextureLoader().load('./assets/texture/waterline.png');
                     child.material.color.set(texture.pillar);
-                    // child.material.map = new THREE.TextureLoader().load('../assets/texture/crate.jpg');
-                break;
-
-                case 'bottom': // 底面贴图
-                    child.material.color.set(texture.bottom);
                 break;
 
                 case 'border': // 边缘边界贴图
@@ -180,6 +180,12 @@ require(['three', 'trunk'], function(THREE, Trunk) {
 
                 default: // 顶面贴图
                     child.material.color.set(texture.top);
+                
+                    // var texture = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
+                    // child.material.map = texture;
+
+                    child.material.transparent = true;
+                    child.material.opacity = 0.3;
                 break;
             }
         }

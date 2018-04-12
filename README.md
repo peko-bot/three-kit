@@ -29,7 +29,7 @@
 | set_texture | 手动设置模型贴图。该方法存在时，texture中只有select会生效 | Function， (child) => {} | 无 |
 | light | 初始化光线，需要手动return光线实例数组 | Function， () => {} | 无 |
 | data | 加载模型及业务数据，具体参数见下 | {} | 无 |
-| show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的 | Function， (child) => {} | 无 |
+| show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的。返回值控制模型是否移动 | Function， (child) => { return Boolean; } | 无 |
 | controls | 轨道控制参数。想看中文文档就去搜一下OrbitControls，直接一点就看./third/three/controls/OrbitControls | {} | 无 |
 
 ## texture

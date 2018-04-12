@@ -120,10 +120,10 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                 var h = Math.floor(height * i / times);
                 _setHeight(child, h);
                 i++;
-            } else if(i === times) {
+            }else if(i === times) {
                 i++;
                 _setHeight(child, height);
-            } else {
+            }else {
                 clearInterval(sh);
                 delete _intervals[sh];
             }
@@ -178,7 +178,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
     // 实时渲染
     function _flush() {
-        function render(){
+        function render() {
             requestAnimationFrame(render);
             TWEEN.update();
             renderer.render(scene, camera);
@@ -221,15 +221,15 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
             if(uuid === child.uuid) {
                 return;
             }else {
-                if(!uuid){ // 第一次
-                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)){
+                if(!uuid) { // 第一次
+                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)) {
                         _current = child;
                         
                         // 鼠标移入设置移入的颜色
                         child.material.color.set(texture.select);
                     }
                 }else {
-                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)){
+                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)) {
                         // 鼠标移开设置原先表面的颜色
                         _current.material.color.set(texture.top);
     
@@ -240,7 +240,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                         child.material.color.set(texture.select);
                     }
                 }
-
             }
         }
     }
@@ -255,8 +254,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         if(child) {
             // 右侧表格数据的显示
             if(config.show_detail) {
-                config.show_detail(child);
-                _meshMove(true, object);
+                var flag = config.show_detail(child);
+                _meshMove(!!flag, object);
             }
         }
     }
@@ -328,8 +327,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                     y: renderer.domElement.offsetHeight / 2
                 }, camera, renderer.domElement);
 
-                // x 的位置需要加上模型宽的一半，避免飞出
-                _withdrawPosition.x += getMeshWidth(object) / 2;
+                // x 的位置需要加上模型长的一半，避免飞出
+                _withdrawPosition.x += getMeshWidth(object).length / 2;
             }
             point = _withdrawPosition;
         }
@@ -350,8 +349,14 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         boxHelper.update();
 
         length = box.max.x - box.min.x;
+        width = box.max.y - box.min.y;
+        height = box.max.z - box.min.z;
 
-        return length;
+        return {
+            length: length,
+            width: width,
+            height: height
+        };
     }
 
     // 定义各板块移动速度
@@ -366,7 +371,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         
         var time = _startPositions[area].time;
         if(!time) {
-            if(config.mesh_shift_time){
+            if(config.mesh_shift_time) {
                 time = _startPositions[area].time = config.mesh_shift_time(time);
             }else {
                 time = 2000;
@@ -500,7 +505,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         Object.assign(controls, config.controls);
         
         // 初始化光线
-        if(config.light){
+        if(config.light) {
             var lights = config.light();
             for(var i = 0; i < lights.length; i++) {
                 scene.add(lights[i]);
