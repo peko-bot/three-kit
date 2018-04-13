@@ -5,8 +5,6 @@
 * @since: 2018-03-11 10:19:50
 */
 define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN) {
-    // 实例对象
-    var Trunk = function() {}
     // 初始化参数
     var _startPositions = {};
     var _startTweenCount = 0;
@@ -482,7 +480,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         rotateAnimate();
     }
 
-    Trunk.prototype.init = function(_config) {
+    function init(_config) {
         config = Object.assign(config, _config);
         // 挂载画布的dom
         container = config.container;
@@ -523,9 +521,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
             objLoader.setMaterials(materials);
             objLoader.load(config.data.objects, function(object) {
-                root = new THREE.Object3D().add(object);
-                scene.add(root);
-
                 // 请求业务数据
                 fetch(config.data.business).then(function(response) {
                     return response.json();
@@ -542,12 +537,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                         }else if(child instanceof THREE.Line) {
                             console.log(child.name)
                         }
+                        
+                        // 初始化动画参数
+                        _dealObjectInLoadCirculStart(child, config.border_visible);
 
                         _set_material(child, config);
 
-                        // 初始化动画参数
-                        _dealObjectInLoadCirculStart(child, config.border_visible);
-        
                         var time = _handle_model_shift(child, config);
     
                         // 开始动画
@@ -567,11 +562,16 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                         _startTweenCount++;
                     });
         
+                    root = new THREE.Object3D().add(object);
+                    scene.add(root);
+                    
                     _flush();
                 });
             });
         });
     };
 
-    return Trunk;
+    return function() {
+        this.init = init;
+    };
 })

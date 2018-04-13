@@ -17,6 +17,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         mesh_shift_time: function(time) { // 定义各板块移动速度
             var duration = 1000;
 
+            return 0;
             return Math.random() * duration * 5 + duration;
         },
         border_visible: true, // 边界是否显示
@@ -55,6 +56,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         },
         show_detail: function(child) { // 这方法主要是把点击的模型传出来，具体要做什么自己写
             var detail = document.getElementById('detail');
+            console.log(child)
 
             // 当点到边界或者柱子的时候不移动模型
             if(Object.getOwnPropertyNames(child.userData).length != 0) {
@@ -119,28 +121,8 @@ require(['three', 'trunk'], function(THREE, Trunk) {
     function initLight() {
         var lights = [];
 
-        lights.push(new THREE.HemisphereLight(16777215, 16777215, 0.3));
-
-        var light1 = new THREE.DirectionalLight(16777215, 0.85);
-        light1.position.set(-150, 25, 50);
-        lights.push(light1);
-
-        var light2 = new THREE.DirectionalLight(16777215, 0.85);
-        light2.position.set(-100, 250, 50);
-        lights.push(light2);
-
-        var spotLight = new THREE.SpotLight('white', 8, 250, 0.44, 1, 2);
-        spotLight.position.set(-60, -30, 140);
-        spotLight.angle = -Math.PI / 4;
-        lights.push(spotLight);
-
-        var spotLight2 = new THREE.SpotLight(16777215, 1);
-        spotLight2.position.set(-100, 200, 20);
-        spotLight2.angle = Math.PI / 4;
-        spotLight2.penumbra = 0.05;
-        spotLight2.decay = 1.5;
-        spotLight2.distance = 1000;
-        lights.push(spotLight2);
+        var ambientLight = new THREE.AmbientLight('white');
+        lights.push(ambientLight)
 
         return lights;
     }
@@ -170,7 +152,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
 
                 case 'pillar': // 柱子贴图
-                    // child.material.map = new THREE.TextureLoader().load('./assets/texture/waterline.png');
+                    child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
                     child.material.color.set(texture.pillar);
                 break;
 
@@ -179,13 +161,17 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
 
                 default: // 顶面贴图
-                    child.material.color.set(texture.top);
-                
-                    // var texture = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
-                    // child.material.map = texture;
-
-                    child.material.transparent = true;
-                    child.material.opacity = 0.3;
+                    if(child.name == 'zhongguan') {
+                        // child.material.map = new THREE.TextureLoader().load('http://i.imgur.com/ETdl4De.png');
+                        new THREE.TextureLoader().load('./assets/texture/63584575_p0.png', function(map) {
+                            // child.material.map = map;
+                            child.material = new THREE.MeshBasicMaterial({ map: map });
+                        });
+                    }
+                    
+                    // child.material.color.set(texture.top);
+                    // child.material.transparent = true;
+                    // child.material.opacity = 0.3;
                 break;
             }
         }
