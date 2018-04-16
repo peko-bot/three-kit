@@ -5,6 +5,7 @@ require.config({
         'obj-loader': './third/three/loaders/OBJLoader',
         'orbitControls': './third/three/controls/OrbitControls',
         'tween': './third/tween/Tween',
+        'deepClone': './util/DeepClone',
         'trunk': './core/Trunk'
     },
 })
@@ -33,8 +34,10 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         set_texture: set_texture, // 手动设置实体贴图。该方法存在时，texture中只有select会生效
         light: initLight,
         data: {
-            materials: './data/model/deqing.mtl',
-            objects: './data/model/deqing.obj',
+            materials: ['./data/model/deqing04.mtl', './data/model/zhengti.mtl'],
+            objects: ['./data/model/deqing04.obj', './data/model/zhengti.obj'],
+            // materials: ['./data/model/deqing05.mtl'],
+            // objects: ['./data/model/deqing05.obj'],
             business: './data/simulation.json',
             business_callback: function(result, object) { // 处理业务数据和模型数据，使板块和表格数据对应
                 for(var i = 0; i < result.length; i++) {
@@ -56,7 +59,6 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         },
         show_detail: function(child) { // 这方法主要是把点击的模型传出来，具体要做什么自己写
             var detail = document.getElementById('detail');
-            console.log(child)
 
             // 当点到边界或者柱子的时候不移动模型
             if(Object.getOwnPropertyNames(child.userData).length != 0) {
@@ -75,6 +77,8 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 }
                 return true;
             }
+
+            return false;
         },
         controls: { // 轨道控制参数
             enableDamping: true, // 使动画循环使用时阻尼或自转，意思是否有惯性
@@ -160,18 +164,24 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                     child.material.color.set(texture.border);
                 break;
 
+                case 'texture': // 等值面
+                    child.material.transparent = true;
+                    child.material.opacity = 0.7;
+                break;
+
                 default: // 顶面贴图
-                    if(child.name == 'zhongguan') {
-                        // child.material.map = new THREE.TextureLoader().load('http://i.imgur.com/ETdl4De.png');
-                        new THREE.TextureLoader().load('./assets/texture/63584575_p0.png', function(map) {
-                            // child.material.map = map;
-                            child.material = new THREE.MeshBasicMaterial({ map: map });
-                        });
-                    }
+                    // if(child.name == 'zhongguan') {
+                    //     new THREE.TextureLoader().load('./assets/texture/crate.jpg', function(texture) {
+                    //         texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+                    //         texture.offset.set(0, 0);
+                    //         texture.repeat.set(1, 1);
+                    //         child.material = new THREE.MeshBasicMaterial({ map: texture });
+                    //     });
+                    // }
                     
-                    // child.material.color.set(texture.top);
-                    // child.material.transparent = true;
-                    // child.material.opacity = 0.3;
+                    child.material.color.set(texture.top);
+                    child.material.transparent = true;
+                    child.material.opacity = 0.3;
                 break;
             }
         }

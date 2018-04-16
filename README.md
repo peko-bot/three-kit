@@ -58,8 +58,8 @@
 ## data
 | 参数 | 说明 | 类型 | 默认值 |
 | :------: | ----- | :------: | :------: |
-| materials | 材质文件路径 | String | 无 |
-| objects | 模型文件路径 | String | 无 |
+| materials | 材质文件路径 | Array | 无 |
+| objects | 模型文件路径 | Array | 无 |
 | business | 业务数据接口地址 | String | 无 |
 | business_callback | 请求业务数据后的回调。result是业务数据，object是模型数据。如果需要显示表格，则需要给模型对象的userData赋值 | (result, object) => {} | 无 |
 

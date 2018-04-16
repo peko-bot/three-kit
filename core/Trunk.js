@@ -4,7 +4,7 @@
 * @author: zy9
 * @since: 2018-03-11 10:19:50
 */
-define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN) {
+define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClone'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, extend) {
     // 初始化参数
     var _startPositions = {};
     var _startTweenCount = 0;
@@ -458,6 +458,42 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
         return tween.start();
     };
 
+    /**
+     * 递归加载、合并多个材质文件
+     * 这里tm居然要用深拷贝复制材料对象类型，需改进mark
+     * @param {*} paths config.data.materials，数组
+     * @param {*} loader 文件加载器
+     * @param {*} material 加载完成后的材质对象，调用时传null就行了
+     * @param {*} callback 加载完成后的回调，相当于ajax里的success，传回材质对象
+     */
+    function _load_materials(paths, loader, material, callback) {
+        loader.load(paths[0], function(materials) {
+            material ? material.materialsInfo = extend(material.materialsInfo, materials.materialsInfo) : material = extend({}, materials);
+
+            paths.shift();
+
+            paths.length != 0 ? _load_materials(paths, loader, material, callback) : callback(material);
+        });
+    }
+
+    /**
+     * 递归加载、合并多个模型文件
+     * 这里tm居然要用深拷贝复制模型对象类型，需改进mark
+     * @param {*} paths config.data.objects，数组
+     * @param {*} loader 文件加载器
+     * @param {*} object 加载完成后的模型对象，调用时传null就行了
+     * @param {*} callback 加载完成后的回调，相当于ajax里的success，传回模型对象
+     */
+    function _load_objects(paths, loader, object, callback) {
+        loader.load(paths[0], function(objects) {
+            object ? object.children = objects.children.concat(object.children) : object = extend({}, objects);
+
+            paths.shift();
+
+            paths.length != 0 ? _load_objects(paths, loader, object, callback) : callback(object);
+        });
+    }
+
     /* 
         完成开场动画后，相机视角变动
         一种是旋转mesh，一种是改变相机位置
@@ -515,12 +551,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
 
         // 加载模型数据
         var mtlLoader = new THREE.MTLLoader();
-        
-        mtlLoader.load(config.data.materials, function(materials) {
-            var objLoader = new THREE.OBJLoader();
 
+        _load_materials(config.data.materials, mtlLoader, null, function(materials) {
+            var objLoader = new THREE.OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.load(config.data.objects, function(object) {
+
+            _load_objects(config.data.objects, objLoader, null, function(object) {
                 // 请求业务数据
                 fetch(config.data.business).then(function(response) {
                     return response.json();
@@ -567,7 +603,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween'], function
                     
                     _flush();
                 });
-            });
+            })
         });
     };
 
