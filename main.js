@@ -18,7 +18,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         mesh_shift_time: function(time) { // 定义各板块移动速度
             var duration = 1000;
 
-            return 0;
+            // return 0;
             return Math.random() * duration * 5 + duration;
         },
         border_visible: true, // 边界是否显示
@@ -31,7 +31,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
             border: '#EBC9AE', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
-        set_texture: set_texture, // 手动设置实体贴图。该方法存在时，texture中只有select会生效
+        set_texture: set_texture, // 手动设置实体贴图。该方法存在时，texture中只有select和top会生效
         light: initLight,
         data: {
             materials: ['./data/model/deqing04.mtl', './data/model/zhengti.mtl'],

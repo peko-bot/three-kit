@@ -26,11 +26,11 @@
 | border_visible | 是否显示上下边界 | Boolean | false |
 | mesh_shift_time | 定义各板块移动时间，单位毫秒 | Number | 2000 |
 | texture | 模型贴图，具体参数见下 | {} | 无 |
-| set_texture | 手动设置模型贴图。该方法存在时，texture中只有select会生效 | Function， (child) => {} | 无 |
-| light | 初始化光线，需要手动return光线实例数组 | Function， () => {} | 无 |
-| data | 加载模型及业务数据，具体参数见下 | {} | 无 |
+| set_texture | 手动设置模型贴图。该方法存在时，texture中只有select和top会生效 | Function， (child) => {} | 无 |
+| light | 初始化光线，需要手动return光线实例数组 | Function， () => { return []; } | 无 |
 | show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的。返回值控制模型是否移动 | Function， (child) => { return Boolean; } | 无 |
 | controls | 轨道控制参数。想看中文文档就去搜一下OrbitControls，直接一点就看./third/three/controls/OrbitControls | {} | 无 |
+| data | 加载模型及业务数据，具体参数见下 | {} | 无 |
 
 ## texture
 | 参数 | 说明 | 类型 | 默认值 |
@@ -43,6 +43,14 @@
 | select | 鼠标移入时，整个板块贴图 | String | 无 |
 * 这里的值都是颜色字符串，hex、十六进制都行，不传就是黑的。
 
+## data
+| 参数 | 说明 | 类型 | 默认值 |
+| :------: | ----- | :------: | :------: |
+| materials | 材质文件路径，形如['./data/model/deqing04.mtl', './data/model/zhengti.mtl']，暂时只支持数组 | Array | 无 |
+| objects | 模型文件路径，形如['./data/model/deqing04.obj', './data/model/zhengti.obj']，暂时只支持数组 | Array | 无 |
+| business | 业务数据接口地址 | String | 无 |
+| business_callback | 请求业务数据后的回调。result是业务数据，object是模型数据。如果需要显示表格，则需要给模型对象的userData赋值 | (result, object) => {} | 无 |
+  
 # 模型数据说明
 假设模型的区域是浙江省，板块名字叫hangzhou
 * 板块是杭州市这一块所在的区域，然后宁波也算个板块，这么多板块拼成的东西叫模型，模型内部及板块内部用line区分边界，模型外部用_border区分边界
@@ -51,16 +59,9 @@
 * line是杭州市下乡镇边界，目前的边界数据是所有乡镇边界都放一起的
 * top_border是模型顶面边界，bottom_border是模型底面边界  
 * hangzhou_pillar是板块中心的柱子
-* 换句话说，obj文件里的名字只能是line、top_border、bottom_border、 、_bottom、_pillar，别的咱不管
+* texture用来贴等值面，实际上就是原先的模型复制一下轮廓
+* 换句话说，obj文件里的名字只能是line、top_border、bottom_border、hangzhou 、hangzhou_bottom、hangzhou_pillar、texture，别的咱不管
   
 嚷嚷这么多东西，其实用到的可能就只有改变材质的时候会用到这些概念
-
-## data
-| 参数 | 说明 | 类型 | 默认值 |
-| :------: | ----- | :------: | :------: |
-| materials | 材质文件路径 | Array | 无 |
-| objects | 模型文件路径 | Array | 无 |
-| business | 业务数据接口地址 | String | 无 |
-| business_callback | 请求业务数据后的回调。result是业务数据，object是模型数据。如果需要显示表格，则需要给模型对象的userData赋值 | (result, object) => {} | 无 |
 
 # License MIT
