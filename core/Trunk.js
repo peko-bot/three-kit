@@ -1,9 +1,9 @@
-/**
-* @version 0.0.1 
-* @module Trunk
-* @author: zy9
-* @since: 2018-03-11 10:19:50
-*/
+/*
+ * @Author: zy9@github.com/zy410419243 
+ * @Date: 2018-03-17 10:50:54 
+ * @Last Modified by: zy9
+ * @Last Modified time: 2018-04-17 13:30:32
+ */
 define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClone'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, extend) {
     // 初始化参数
     var _startPositions = {};
@@ -26,13 +26,19 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     
     var clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
     var clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+    
     // 多次用到容器节点，存到全局变量里方便调用
     var container = {};
 
     // 初始化three渲染三要素
     var camera, renderer, scene;
     // 默认配置
-    var config = {};
+    var config = {
+        clear_opacity: 0.2, // 画布透明度
+        mesh_shift_time: function() { // 板块移动时间
+            return 2000;
+        },
+    };
 
     // 初始化开场动画前板块位置
     function _initAreaPosition(area, child) {
@@ -48,7 +54,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         child.position.set(p.x, p.y, p.z);
     }
 
-    // 预处理开场动画前的数据
+    // 处理开场动画参数
     function _dealObjectInLoadCirculStart(child, visible) {
         if(!child.name) {
             return;
@@ -366,22 +372,17 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         if(!_startPositions[area]) {
             return;
         }
-        
-        var time = _startPositions[area].time;
-        if(!time) {
-            if(config.mesh_shift_time) {
-                time = _startPositions[area].time = config.mesh_shift_time(time);
-            }else {
-                time = 2000;
-            }
-        }
 
-        return time;
+        return time = config.mesh_shift_time && config.mesh_shift_time();
     }
 
-    function _set_material(child) {
-        if(config.set_texture) {
-            config.set_texture(child);
+    /**
+     * 遍历所有模型对象时的回调 
+     * @param {*} child 当前遍历模型
+     */
+    function child_mapping(child) {
+        if(config.child_mapping) {
+            config.child_mapping(child);
 
             return;
         }
@@ -420,18 +421,23 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     // 计算模型移动距离
     function _getCoordinate2InScene(i, d, c) {
         d.updateMatrixWorld(true);
+
         var b = getVector2InScene(i, c);
         var j = new THREE.Vector3(b.x, b.y, 0);
+
         j.unproject(d);
         j.sub(d.position);
         j.normalize();
+
         var f = new THREE.Raycaster(d.position, j);
         var h = f.ray.origin;
         var g = f.ray.direction;
         var e = 0;
         var a = new THREE.Vector3();
+
         a.setX(h.x - ((h.z - e) * g.x / g.z));
         a.setY(h.y - ((h.z - e) * g.y / g.z));
+        
         return a;
     }
 
@@ -447,6 +453,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
      * @param a 起点
      * @param b 终点
      * @param t 过渡时间
+     * @param c 动画加载完成回调
+     * @param s 动画开始回调
      */
     function _tweenInOut(a, b, t, c, s) {
         var tween = new TWEEN.Tween(a)
@@ -494,11 +502,51 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         });
     }
 
-    /* 
-        完成开场动画后，相机视角变动
-        一种是旋转mesh，一种是改变相机位置
-        这是旋转mesh
+    /**
+     * 初始化参数
     */
+    function _init_params() {
+        // 挂载画布的dom
+        container = config.container;
+
+        // 相机视锥体的长宽比
+        var _camera_aspect = clientWidth / clientHeight;
+        camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
+        camera.position.z = 100;
+        
+        // 设置画布透明
+        renderer = new THREE.WebGLRenderer({
+            alpha:true,
+            antialias: true
+        });
+        renderer.setSize(clientWidth, clientHeight - 4);
+
+        container.appendChild(renderer.domElement);
+
+        scene = new THREE.Scene();
+        scene.add(camera);
+
+        // 初始化轨道控制
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        Object.assign(controls, config.controls);
+
+        // 初始化光线
+        if(config.light) {
+            var lights = config.light();
+            for(var i = 0; i < lights.length; i++) {
+                scene.add(lights[i]);
+            }
+        }
+     
+        // 设置背景颜色
+        config.clear_color && renderer.setClearColor(config.clear_color, config.clear_opacity);
+    }
+
+    /**
+     * 完成开场动画后，相机视角变动
+     * 一种是旋转mesh，一种是改变相机位置
+     * 这是旋转mesh
+     */
     function _afterMovementMesh() {
         // 视角转动速度
         var speed = 0.02;
@@ -516,39 +564,60 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         rotateAnimate();
     }
 
-    function init(_config) {
-        config = Object.assign(config, _config);
-        // 挂载画布的dom
-        container = config.container;
-
-        // 相机视锥体的长宽比
-        var _camera_aspect = clientWidth / clientHeight;
-        camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
-        camera.position.z = 100;
-        
-        renderer = new THREE.WebGLRenderer();
-        renderer.setSize(clientWidth, clientHeight - 4);
-
-        container.appendChild(renderer.domElement);
-
-        scene = new THREE.Scene();
-        scene.add(camera);
-
-        // 初始化轨道控制
-        var controls = new THREE.OrbitControls(camera, renderer.domElement);
-        Object.assign(controls, config.controls);
-        
-        // 初始化光线
-        if(config.light) {
-            var lights = config.light();
-            for(var i = 0; i < lights.length; i++) {
-                scene.add(lights[i]);
+    /**
+     * 预处理模型数据
+    */
+    function _handle_mesh(object) {
+        object.traverse(function(child) {
+            if(child instanceof THREE.Group) {
+                return;
             }
-        }
-        
-        // 设置背景颜色
-        config.clear_color && renderer.setClearColor(config.clear_color);
+            if(child instanceof THREE.Mesh) {
+                child.geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
+            }else if(child instanceof THREE.Line) {
+                console.log(child.name)
+            }
+            
+            _dealObjectInLoadCirculStart(child, config.border_visible);
 
+            child_mapping(child, config);
+
+            var time = _handle_model_shift(child, config);
+
+            // 开始动画
+            _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
+                _startTweenCount--;
+                if(_startTweenCount === 0) {
+                    // 渲染柱子
+                    object.traverse(function(child) {
+                        _changeModel4DataRefresh(child, config.divisor);
+                    });
+                    _afterMovementMesh();
+
+                    // 绑定事件，比如鼠标移到板块上高亮
+                    _initListener(object);
+                }
+            });
+            _startTweenCount++;
+        });
+    }
+
+    /**
+     * 显示贴图
+    */
+    function show_texture() {
+        
+    }
+
+    function init(_config) {
+        // 加载材质和模型的方法有副作用，暂时先深拷贝，待改进mark
+        config = extend(config, _config);
+        
+        _init_params(_config);
+        
+        // 初始化前的钩子
+        config.before_init && config.before_init(config);
+        
         // 加载模型数据
         var mtlLoader = new THREE.MTLLoader();
 
@@ -561,42 +630,10 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
                 fetch(config.data.business).then(function(response) {
                     return response.json();
                 }).then(function(result) {
-                    // 处理数据回调
+                    // 外部处理数据回调
                     config.data.business_callback && config.data.business_callback(result, object);
 
-                    object.traverse(function(child) {
-                        if(child instanceof THREE.Group) {
-                            return;
-                        }
-                        if(child instanceof THREE.Mesh) {
-                            child.geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
-                        }else if(child instanceof THREE.Line) {
-                            console.log(child.name)
-                        }
-                        
-                        // 初始化动画参数
-                        _dealObjectInLoadCirculStart(child, config.border_visible);
-
-                        _set_material(child, config);
-
-                        var time = _handle_model_shift(child, config);
-    
-                        // 开始动画
-                        _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
-                            _startTweenCount--;
-                            if(_startTweenCount === 0) {
-                                // 渲染柱子
-                                object.traverse(function(child) {
-                                    _changeModel4DataRefresh(child, config.divisor);
-                                });
-                                _afterMovementMesh();
-
-                                // 绑定事件，比如鼠标移到板块上高亮
-                                _initListener(object);
-                            }
-                        });
-                        _startTweenCount++;
-                    });
+                    _handle_mesh(object);
         
                     root = new THREE.Object3D().add(object);
                     scene.add(root);
@@ -609,5 +646,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
 
     return function() {
         this.init = init;
+        this.show_texture = show_texture;
     };
 })

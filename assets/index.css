@@ -1,3 +1,16 @@
+body {
+    background: rgba(212, 164, 30, 0.5);
+}
+
+.timeline {
+    width: 100px;
+    height: 100px;
+    background: red;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .detail {
     position: absolute;
     top: 25%;

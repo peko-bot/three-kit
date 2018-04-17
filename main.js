@@ -1,3 +1,9 @@
+/*
+ * @Author: zy9@github.com/zy410419243 
+ * @Date: 2018-04-05 10:53:03 
+ * @Last Modified by: zy9
+ * @Last Modified time: 2018-04-17 12:33:06
+ */
 require.config({
     paths:{
         'three': './third/three/three_r91',
@@ -14,13 +20,14 @@ require(['three', 'trunk'], function(THREE, Trunk) {
     var Trunk = new Trunk();
     Trunk.init({
         container: document.getElementById('container'), // 画布挂载节点
-        clear_color: 0x4584b4, // 画布颜色
-        mesh_shift_time: function(time) { // 定义各板块移动速度
-            var duration = 1000;
+        // clear_color: 0x4584b4, // 画布颜色
+        // clear_opacity: 0.5, // 画布透明度
+        before_init: before_init,
+        // mesh_shift_time: function() { // 定义各板块移动速度
+        //     var duration = 1000;
 
-            // return 0;
-            return Math.random() * duration * 5 + duration;
-        },
+        //     return Math.random() * duration * 5 + duration;
+        // },
         border_visible: true, // 边界是否显示
         divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
         texture: {
@@ -31,13 +38,11 @@ require(['three', 'trunk'], function(THREE, Trunk) {
             border: '#EBC9AE', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
-        set_texture: set_texture, // 手动设置实体贴图。该方法存在时，texture中只有select和top会生效
+        child_mapping: child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
         light: initLight,
         data: {
-            materials: ['./data/model/deqing04.mtl', './data/model/zhengti.mtl'],
-            objects: ['./data/model/deqing04.obj', './data/model/zhengti.obj'],
-            // materials: ['./data/model/deqing05.mtl'],
-            // objects: ['./data/model/deqing05.obj'],
+            materials: ['./data/model/deqing05.mtl'],
+            objects: ['./data/model/deqing05.obj'],
             business: './data/simulation.json',
             business_callback: function(result, object) { // 处理业务数据和模型数据，使板块和表格数据对应
                 for(var i = 0; i < result.length; i++) {
@@ -87,6 +92,11 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         }
     });
 
+    var timeline = document.getElementById('timeline');
+    timeline.addEventListener('click', function() {
+        Trunk.show_texture();
+    }, false);
+
     // 创建表格元素
     function createTable(child, element) {
         var data = Object.assign({ stnm: '-', val: '-' }, child.userData);
@@ -132,17 +142,17 @@ require(['three', 'trunk'], function(THREE, Trunk) {
     }
 
     /**
-     * 修改模型材质
-     * @param child 遍历所有模型对象时的回调 
+     * 遍历所有模型对象时的回调 
+     * @param {*} child 当前遍历模型
      */
-    function set_texture(child) {
+    function child_mapping(child) {
         if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
             var name = child.name.split('_');
             var last_name = name[name.length - 1];
 
             var texture = {
                 line: '#045AAF', // 内部乡镇边界贴图
-                pillar: '#1E8FF7', // 柱子贴图
+                pillar: '#FFF', // 柱子贴图
                 top: '#303471', // 上表面贴图
                 bottom: '#000', // 底部贴图
                 border: '#F96', // 边缘边界贴图
@@ -165,19 +175,15 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
 
                 case 'texture': // 等值面
-                    child.material.transparent = true;
-                    child.material.opacity = 0.7;
+                    // child.material.transparent = true;
+                    // child.material.opacity = 0.7;
+                    child.visible = false;
                 break;
 
                 default: // 顶面贴图
-                    // if(child.name == 'zhongguan') {
-                    //     new THREE.TextureLoader().load('./assets/texture/crate.jpg', function(texture) {
-                    //         texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
-                    //         texture.offset.set(0, 0);
-                    //         texture.repeat.set(1, 1);
-                    //         child.material = new THREE.MeshBasicMaterial({ map: texture });
-                    //     });
-                    // }
+                    if(child.name == 'zhongguan') {
+                        // console.log(child)
+                    }
                     
                     child.material.color.set(texture.top);
                     child.material.transparent = true;
@@ -185,5 +191,9 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
             }
         }
+    }
+    
+    function before_init(config) { // 初始化前的钩子
+        
     }
 });
