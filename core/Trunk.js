@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-03-17 10:50:54 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-17 13:30:32
+ * @Last Modified time: 2018-04-17 15:52:53
  */
 define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClone'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, extend) {
     // 初始化参数
@@ -29,6 +29,9 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     
     // 多次用到容器节点，存到全局变量里方便调用
     var container = {};
+
+    // 整个模块的贴图，用作等值面
+    var model_texture = {};
 
     // 初始化three渲染三要素
     var camera, renderer, scene;
@@ -577,6 +580,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
             }else if(child instanceof THREE.Line) {
                 console.log(child.name)
             }
+
+            child.name == 'texture' && (model_texture = child);
             
             _dealObjectInLoadCirculStart(child, config.border_visible);
 
@@ -605,8 +610,15 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     /**
      * 显示贴图
     */
-    function show_texture() {
-        
+    function show_texture(material, url) {
+        if(url) {
+            new THREE.TextureLoader().load(url, function(map) {
+                model_texture.material.map = map;
+            });
+        }
+
+        model_texture.material = Object.assign(model_texture.material, material);
+        model_texture.visible = !model_texture.visible;
     }
 
     function init(_config) {
@@ -622,6 +634,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         var mtlLoader = new THREE.MTLLoader();
 
         _load_materials(config.data.materials, mtlLoader, null, function(materials) {
+            config.set_material && (materials = config.set_material(materials));
+            
             var objLoader = new THREE.OBJLoader();
             objLoader.setMaterials(materials);
 

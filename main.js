@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-05 10:53:03 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-17 12:33:06
+ * @Last Modified time: 2018-04-17 17:03:06
  */
 require.config({
     paths:{
@@ -40,6 +40,19 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         },
         child_mapping: child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
         light: initLight,
+        set_material: function(materials) {
+            var info = materials.materialsInfo;
+            for(var key in info) {
+                var value = info[key];
+
+                // 初始化等值面
+                if(key == 'texture') {
+                    value.map_d = value.map_ka = value.map_kd = '../data/images/20180413180000_20180416180000.png';
+                }
+            }
+            
+            return materials;
+        },
         data: {
             materials: ['./data/model/deqing05.mtl'],
             objects: ['./data/model/deqing05.obj'],
@@ -94,7 +107,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
 
     var timeline = document.getElementById('timeline');
     timeline.addEventListener('click', function() {
-        Trunk.show_texture();
+        Trunk.show_texture({ transparent: true, opacity: 0.5 }, './data/images/20180404100000_20180416100000.png');
     }, false);
 
     // 创建表格元素
@@ -175,19 +188,13 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
 
                 case 'texture': // 等值面
-                    // child.material.transparent = true;
-                    // child.material.opacity = 0.7;
                     child.visible = false;
                 break;
 
                 default: // 顶面贴图
-                    if(child.name == 'zhongguan') {
-                        // console.log(child)
-                    }
-                    
                     child.material.color.set(texture.top);
                     child.material.transparent = true;
-                    child.material.opacity = 0.3;
+                    child.material.opacity = 0.4;
                 break;
             }
         }

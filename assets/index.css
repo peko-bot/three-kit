@@ -4,11 +4,14 @@ body {
 
 .timeline {
     width: 100px;
-    height: 100px;
-    background: red;
+    height: 50px;
+    background: #F96;
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 5%;
+    left: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .detail {

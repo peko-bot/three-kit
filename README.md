@@ -17,17 +17,18 @@
 电脑渣，录的很卡，德芙版请部署到本地
 
 # API
-## Trunk.init()
+## Trunk.init(config)
 | 参数 | 说明 | 类型 | 默认值 |
 | :------: | ----- | :------: | :------: |
 | container | 挂载画布的节点 | dom | 无 |
 | divisor | 用于控制柱子高度，算法：柱子高度 = 当前模型中数据 / divisor * 15，也就是说divisor越小，柱子越高。一般是传数据中的最大值 | String或Number | 无 |
 | clear_color | 画布颜色。颜色字符串，hex、十六进制都行 | String | 无 |
-| clear_opacity | 画布透明度 | Float，[0, 1] | 0.2 |
+| clear_opacity | 画布透明度 | Float, [0, 1] | 0.2 |
 | border_visible | 是否显示上下边界 | Boolean | false |
 | mesh_shift_time | 定义各板块移动时间，单位毫秒 | Number | 2000 |
 | texture | 设置鼠标移入、移出板块颜色变化 | {} | 无 |
 | before_init | 在加载模型之前、初始化参数之后的钩子，传出于默认值合并后的config | Function, (config) => {}  | 无 |
+| set_material | 加载材料后、加载模型前的钩子，用于处理等值面之类的贴图，不预先处理的话，texture.map.image的尺寸没法确定。传出合并后的材料对象 | Function, (materials) => { return materials; }  | 无 |
 | child_mapping | 手动设置模型贴图，可以理解为遍历模型数据时的回调 | Function, (child, config) => {} | 无 |
 | light | 初始化光线，需要手动return光线实例数组 | Function, () => { return []; } | 无 |
 | show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的。返回值控制模型是否移动 | Function, (child) => { return Boolean; } | 无 |
@@ -53,6 +54,12 @@
 | objects | 模型文件路径，形如['./data/model/deqing04.obj', './data/model/zhengti.obj']，暂时只支持数组 | Array | 无 |
 | business | 业务数据接口地址 | String | 无 |
 | business_callback | 请求业务数据后的回调，也可以理解成加载完成后、动画尚未开始时的钩子。result是业务数据，object是模型数据。如果需要显示表格，则需要给模型对象的userData赋值 | (result, object) => {} | 无 |
+
+## Trunk.show_texture(config, url)
+| 参数 | 说明 | 类型 | 默认值 |
+| :------: | ----- | :------: | :------: |
+| config | 控制等值面是否显示，visible可以不用传，其它属性和mesh.material中的属性对应，形如{ transparent: true, opacity: 0.5 } | {} | 无 |
+| url | 等值面图的地址 | String | 无 |
   
 # 模型数据说明
 假设模型的区域是浙江省，板块名字叫hangzhou
