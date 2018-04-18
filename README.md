@@ -51,7 +51,7 @@
 
 ## Trunk.init(config) -> config.勾子(生命周期)
 | 参数 | 说明 | 类型 |
-| :------: | ----- | :------: | :------: |
+| :------: | ----- | :------: |
 | before_init | 在加载模型之前、初始化参数之后的钩子，传出于默认值合并后的config | Function, (config) => {}  |
 | set_material | 加载材料后、加载模型前的钩子，用于处理等值面之类的贴图，不预先处理的话，texture.map.image的尺寸没法确定。传出合并后的材料对象 | Function, (materials) => { return materials; }  |
 | data.load | 勉强算是勾子，在加载材质和模型之后，在渲染之前，毕竟数据还没处理。本来写在类内，但想想数据处理太复杂就丢出来了。具体data中的参数 | Function, (object, goon) |
@@ -69,7 +69,7 @@
 
 ## Trunk.init(config) -> config.data
 | 参数 | 说明 | 类型 |
-| :------: | ----- | :------: | :------: |
+| :------: | ----- | :------: |
 | materials | 材质文件路径，形如['./data/model/deqing04.mtl', './data/model/zhengti.mtl']，暂时只支持数组 | Array |
 | objects | 模型文件路径，形如['./data/model/deqing04.obj', './data/model/zhengti.obj']，暂时只支持数组 | Array |
 | load | 初次加载数据时执行的方法，object是合并后的模型对象，goon是处理完数据（使模型和业务数据对应）后需要执行的方法，执行完后得把新的模型数据传进去，形如goon(new_object) | Function, (object, goon) |
