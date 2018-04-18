@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-03-17 10:50:54 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-17 15:52:53
+ * @Last Modified time: 2018-04-18 15:52:53
  */
 define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClone'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, extend) {
     // 初始化参数
@@ -23,6 +23,9 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     var _withdrawPosition = false;
     // 处理模型移动的方法
     var _meshTween = null;
+    
+    // 模型数据
+    var dataObject;
     
     var clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
     var clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
@@ -141,7 +144,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     };
     
     /**
-     * 设置模型高度
+     * 设置柱子高度
      * 这个方法不要加太多逻辑，这里我试着在循环里console.log，渣电脑甚至能掉帧
      * @param child
      * @param height
@@ -471,7 +474,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
 
     /**
      * 递归加载、合并多个材质文件
-     * 这里tm居然要用深拷贝复制材料对象类型，需改进mark
+     * TODO 弃用深拷贝，略浪费性能
      * @param {*} paths config.data.materials，数组
      * @param {*} loader 文件加载器
      * @param {*} material 加载完成后的材质对象，调用时传null就行了
@@ -489,7 +492,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
 
     /**
      * 递归加载、合并多个模型文件
-     * 这里tm居然要用深拷贝复制模型对象类型，需改进mark
+     * TODO 弃用深拷贝，略浪费性能
      * @param {*} paths config.data.objects，数组
      * @param {*} loader 文件加载器
      * @param {*} object 加载完成后的模型对象，调用时传null就行了
@@ -557,7 +560,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         var rotateAnimate = function() {
             requestAnimationFrame(rotateAnimate);
             
-            // y轴正半轴朝上
+            // y轴正半轴朝上，这方法用作除抖
             // root.position.y <= 0 ? root.position.y += 0.8 : null;
             // 沿x轴旋转
             root.rotation.x >= -Math.PI / 4 ? root.rotation.x -= speed : null;
@@ -569,6 +572,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
 
     /**
      * 预处理模型数据
+     * @param object 模型数据
     */
     function _handle_mesh(object) {
         object.traverse(function(child) {
@@ -593,10 +597,7 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
             _tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, function() {
                 _startTweenCount--;
                 if(_startTweenCount === 0) {
-                    // 渲染柱子
-                    object.traverse(function(child) {
-                        _changeModel4DataRefresh(child, config.divisor);
-                    });
+                    render_pillar(object);
                     _afterMovementMesh();
 
                     // 绑定事件，比如鼠标移到板块上高亮
@@ -609,6 +610,8 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
 
     /**
      * 显示贴图
+     * @param material 传入的材质，最后和原材质中的属性合并
+     * @param url 等值面图片地址
     */
     function show_texture(material, url) {
         if(url) {
@@ -621,8 +624,25 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
         model_texture.visible = !model_texture.visible;
     }
 
+    /**
+     * 更新数据并刷新柱子高度，也就是动画重播一遍
+     * TODO 根据传入对象判断哪些对象需要更新
+     * @param {*} object 新的模型对象
+     */
+    function refresh_pillar(object) {
+        dataObject = object;
+        render_pillar(dataObject);
+    }
+
+    // 渲染柱子
+    function render_pillar(obj) {
+        obj.traverse(function(child) {
+            _changeModel4DataRefresh(child, config.divisor);
+        });
+    }
+
     function init(_config) {
-        // 加载材质和模型的方法有副作用，暂时先深拷贝，待改进mark
+        // TODO 去掉加载材质和模型方法的副作用
         config = extend(config, _config);
         
         _init_params(_config);
@@ -640,16 +660,12 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
             objLoader.setMaterials(materials);
 
             _load_objects(config.data.objects, objLoader, null, function(object) {
-                // 请求业务数据
-                fetch(config.data.business).then(function(response) {
-                    return response.json();
-                }).then(function(result) {
-                    // 外部处理数据回调
-                    config.data.business_callback && config.data.business_callback(result, object);
+                config.data.load(object, function(new_object) {
+                    dataObject = new_object;
 
-                    _handle_mesh(object);
-        
-                    root = new THREE.Object3D().add(object);
+                    _handle_mesh(new_object);
+
+                    root = new THREE.Object3D().add(new_object);
                     scene.add(root);
                     
                     _flush();
@@ -661,5 +677,9 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
     return function() {
         this.init = init;
         this.show_texture = show_texture;
+        this.refresh_pillar = refresh_pillar;
+        this.get_object = function() {
+            return dataObject;
+        }
     };
 })

@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-05 10:53:03 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-17 17:03:06
+ * @Last Modified time: 2018-04-18 17:26:32
  */
 require.config({
     paths:{
@@ -22,7 +22,7 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         container: document.getElementById('container'), // 画布挂载节点
         // clear_color: 0x4584b4, // 画布颜色
         // clear_opacity: 0.5, // 画布透明度
-        before_init: before_init,
+        before_init: null, // 初始化前的钩子
         // mesh_shift_time: function() { // 定义各板块移动速度
         //     var duration = 1000;
 
@@ -56,24 +56,9 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         data: {
             materials: ['./data/model/deqing05.mtl'],
             objects: ['./data/model/deqing05.obj'],
-            business: './data/simulation.json',
-            business_callback: function(result, object) { // 处理业务数据和模型数据，使板块和表格数据对应
-                for(var i = 0; i < result.length; i++) {
-                    var item = result[i];
-        
-                    for(var j = 0; j < object.children.length; j++) {
-                        var jtem = object.children[j];
-        
-                        if(item.stcd == jtem.name.split('_')[0]) {
-                            /* 
-                                这个userData很关键，
-                                点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
-                            */
-                            jtem.userData = item;
-                        }
-                    }
-                }
-            },
+            load: function(object, goon) {
+                search(object, goon);
+            }
         },
         show_detail: function(child) { // 这方法主要是把点击的模型传出来，具体要做什么自己写
             var detail = document.getElementById('detail');
@@ -105,6 +90,12 @@ require(['three', 'trunk'], function(THREE, Trunk) {
         }
     });
 
+    var refresh_pillar = document.getElementById('refreshPillar');
+    refresh_pillar.addEventListener('click', function() {
+        search();
+    }, false);
+
+    // 显示等值面
     var timeline = document.getElementById('timeline');
     timeline.addEventListener('click', function() {
         Trunk.show_texture({ transparent: true, opacity: 0.5 }, './data/images/20180404100000_20180416100000.png');
@@ -199,8 +190,28 @@ require(['three', 'trunk'], function(THREE, Trunk) {
             }
         }
     }
+
+    // 请求新数据并刷新柱子
+    function search(object, goon) {
+        // 请求业务数据，自行拼接参数。当然不用fetch也行，反正最终给goon传入新的模型对象就行了
+        fetch('./data/simulation.json?t=' + ~~(Math.random() * 1000)).then(function(response) {
+            return response.json();
+        }).then(function(result) {
+            object = object ? object : Trunk.get_object();
+            for(var i = 0; i < result.length; i++) { // 处理业务数据和模型数据，使板块和表格数据对应
+                var item = result[i];
     
-    function before_init(config) { // 初始化前的钩子
-        
+                for(var j = 0; j < object.children.length; j++) {
+                    var jtem = object.children[j];
+    
+                    if(item.stcd == jtem.name.split('_')[0]) {
+                        // 这个userData很关键，
+                        // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
+                        jtem.userData = item;
+                    }
+                }
+            }
+            goon ? goon(object) : Trunk.refresh_pillar(object);
+        });
     }
 });
