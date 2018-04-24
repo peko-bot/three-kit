@@ -5,7 +5,35 @@
  * @Last Modified time: 2018-04-18 15:52:53
  */
 define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClone'], function(THREE, MTLLoader, OBJLoader, OrbitControls, TWEEN, extend) {
-    // 初始化参数
+    // 默认配置
+    var config = {
+        // clear_color: 0x4584b4, // 画布颜色
+        clear_opacity: 0.2, // 画布透明度
+        mesh_shift_time: function() { // 板块移动时间
+            return Math.random() * 1000 * 5 + 1000;
+        },
+        before_init: null, // 初始化前的钩子
+        border_visible: true, // 边界是否显示
+        divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
+        texture: {
+            line: '#045AAF', // 内部乡镇边界贴图
+            pillar: '#1E8FF7', // 柱子贴图
+            top: '#303471', // 上表面贴图
+            bottom: '#000', // 底部贴图
+            border: '#EBC9AE', // 边缘边界贴图
+            select: '#071C5B', // 鼠标移入时贴图
+        },
+        light: function() { // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
+            var lights = [];
+
+            var ambientLight = new THREE.AmbientLight('white');
+            lights.push(ambientLight)
+
+            return lights;
+        },
+
+    };
+
     var _startPositions = {};
     var _startTweenCount = 0;
     // 柱子高度变化的定时器
@@ -38,13 +66,6 @@ define(['three', 'mtl-loader', 'obj-loader', 'orbitControls', 'tween', 'deepClon
 
     // 初始化three渲染三要素
     var camera, renderer, scene;
-    // 默认配置
-    var config = {
-        clear_opacity: 0.2, // 画布透明度
-        mesh_shift_time: function() { // 板块移动时间
-            return 2000;
-        },
-    };
 
     // 初始化开场动画前板块位置
     function _initAreaPosition(area, child) {

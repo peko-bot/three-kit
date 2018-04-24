@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-05 10:53:03 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-18 17:26:32
+ * @Last Modified time: 2018-04-24 11:19:57 
  */
 require.config({
     paths:{
@@ -21,25 +21,10 @@ require(['three', 'trunk'], function(THREE, Trunk) {
     Trunk.init({
         container: document.getElementById('container'), // 画布挂载节点
         // clear_color: 0x4584b4, // 画布颜色
-        // clear_opacity: 0.5, // 画布透明度
-        before_init: null, // 初始化前的钩子
-        // mesh_shift_time: function() { // 定义各板块移动速度
-        //     var duration = 1000;
-
-        //     return Math.random() * duration * 5 + duration;
-        // },
-        border_visible: true, // 边界是否显示
-        divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
-        texture: {
-            line: '#045AAF', // 内部乡镇边界贴图
-            pillar: '#1E8FF7', // 柱子贴图
-            top: '#303471', // 上表面贴图
-            bottom: '#000', // 底部贴图
-            border: '#EBC9AE', // 边缘边界贴图
-            select: '#071C5B', // 鼠标移入时贴图
+        mesh_shift_time: function() { // 定义各板块移动速度
+            return 2000;
         },
         child_mapping: child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
-        light: initLight,
         set_material: function(materials) {
             var info = materials.materialsInfo;
             for(var key in info) {
@@ -134,19 +119,6 @@ require(['three', 'trunk'], function(THREE, Trunk) {
 
         element.innerHTML += table + decorate;
     };
-
-    /**
-     * 初始化光线
-     * x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
-     */
-    function initLight() {
-        var lights = [];
-
-        var ambientLight = new THREE.AmbientLight('white');
-        lights.push(ambientLight)
-
-        return lights;
-    }
 
     /**
      * 遍历所有模型对象时的回调 
