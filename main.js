@@ -84,9 +84,12 @@ require(['three', 'trunk'], function(THREE, Trunk) {
             return false;
         },
         controls: { // 轨道控制参数
-            enableDamping: true, // 使动画循环使用时阻尼或自转，意思是否有惯性
-            enableZoom: true, // 是否可以缩放
-            enabled: true, // 是否启用轨道控制
+            maxPolarAngle: Math.PI * 0.75,
+            minPolarAngle: Math.PI * 0.25,
+            maxDistance: 200,
+            minDistance: 70,
+            maxAzimuthAngle: 0, // 不能右旋转
+            minAzimuthAngle: 0 // 不能左旋转
         }
     });
 
@@ -170,7 +173,8 @@ require(['three', 'trunk'], function(THREE, Trunk) {
                 break;
 
                 case 'pillar': // 柱子贴图
-                    child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
+                    // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
+                    child.material.map = new THREE.CanvasTexture(get_text_canvas('测试', '#000'));
                     child.material.color.set(texture.pillar);
                 break;
 
@@ -213,5 +217,22 @@ require(['three', 'trunk'], function(THREE, Trunk) {
             }
             goon ? goon(object) : Trunk.refresh_pillar(object);
         });
+    }
+
+    // 创建柱子贴图
+    function get_text_canvas(text, style) {
+        var canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 300;
+
+        var context = canvas.getContext( '2d' );
+        context.beginPath();
+        context.font='50px Microsoft YaHei';
+        context.fillStyle = style;
+        context.fillText(text, 0, 50);
+        context.fill();
+        context.stroke();
+
+        return canvas;
     }
 });
