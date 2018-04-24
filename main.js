@@ -14,6 +14,7 @@ require.config({
         'deepClone': './util/DeepClone',
         'trunk': './core/Trunk'
     },
+    waitSeconds: 0
 })
 
 require(['three', 'trunk'], function(THREE, Trunk) {
@@ -32,10 +33,10 @@ require(['three', 'trunk'], function(THREE, Trunk) {
 
                 // 初始化等值面
                 if(key == 'texture') {
-                    value.map_d = value.map_ka = value.map_kd = '../data/images/20180413180000_20180416180000.png';
+                    value.map_d = value.map_ka = value.map_kd = './data/images/20180413180000_20180416180000.png';
                 }
             }
-            
+
             return materials;
         },
         data: {
