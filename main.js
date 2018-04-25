@@ -1,3 +1,9 @@
+/*
+ * @Author: zy9@github.com/zy410419243 
+ * @Date: 2018-04-24 15:34:46 
+ * @Last Modified by: zy9
+ * @Last Modified time: 2018-04-25 16:56:27
+ */
 import Trunk from './core/Trunk'
 import * as THREE from 'three'
 
@@ -17,8 +23,12 @@ trunk.init({
     // clear_color: 0x4584b4, // 画布颜色
     mesh_shift_time: () => 2000, // 定义各板块移动速度
     child_mapping: child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
-    clientWidth: 1158,
-    clientHeight: 568,
+    // clientWidth: 1158,
+    // clientHeight: 568,
+    texture: {
+        select: '#054B87',
+        top: '#07205b'
+    },
     set_material: materials => {
         let info = materials.materialsInfo;
         for(let key in info) {
@@ -49,7 +59,7 @@ trunk.init({
                 detail.removeChild(detail.children[i]);
             }
                 createTable(child, detail);
-            }else {
+            } else {
                 // 如果表格不存在，创建
                 createTable(child, detail);
             }
@@ -78,22 +88,20 @@ function child_mapping(child) {
         let last_name = name[name.length - 1];
 
         let texture = {
-            line: '#045AAF', // 内部乡镇边界贴图
-            pillar: '#FFF', // 柱子贴图
-            top: '#303471', // 上表面贴图
-            bottom: '#000', // 底部贴图
-            border: '#F96', // 边缘边界贴图
-            select: '#071C5B', // 鼠标移入时贴图
+            line: '#055290', // 内部乡镇边界贴图
+            pillar: '#2377e8', // 柱子贴图
+            top: '#07205b', // 上表面贴图
+            border: '#2a8fdf', // 边缘边界贴图
         };
 
         // 改变模型贴图
         switch(last_name) {
-            case 'line': // 内部乡镇边界贴图
+            case 'Line': // 内部乡镇边界贴图
                 child.material.color.set(texture.line);
             break;
 
             case 'pillar': // 柱子贴图
-                child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
+                // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
                 // child.material.map = new THREE.CanvasTexture(get_text_canvas('测试', '#000'));
                 child.material.color.set(texture.pillar);
             break;
@@ -108,8 +116,8 @@ function child_mapping(child) {
 
             default: // 顶面贴图
                 child.material.color.set(texture.top);
-                child.material.transparent = true;
-                child.material.opacity = 0.4;
+                // child.material.transparent = true;
+                // child.material.opacity = 0.7;
             break;
         }
     }

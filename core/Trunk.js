@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:33:50 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-25 15:26:15
+ * @Last Modified time: 2018-04-25 16:51:34
  */
 import { Vector2, Vector3,  AmbientLight, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture } from 'three'
 import MTLLoader from '../third/three/loader/MTLLoader'
@@ -21,11 +21,11 @@ export default class Trunk {
         border_visible: true, // 边界是否显示
         divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
         texture: {
-            line: '#045AAF', // 内部乡镇边界贴图
-            pillar: '#1E8FF7', // 柱子贴图
-            top: '#303471', // 上表面贴图
+            line: '#055290', // 内部乡镇边界贴图
+            pillar: '#2377e8', // 柱子贴图
+            top: '#07205b', // 上表面贴图
             bottom: '#000', // 底部贴图
-            border: '#EBC9AE', // 边缘边界贴图
+            border: '#2a8fdf', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
         light: () => { // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
@@ -130,11 +130,11 @@ export default class Trunk {
                 // 不支持负数，但万一传了负数，暂按0处理
                 if(height <= 0) {
                     child.visible = false;
-                }else {
+                } else {
                     this._setHeightSlow(child, height);
                     child.visible = true;
                 }
-            }else {
+            } else {
                 dmName = name ? name.split('_')[0] : '';
                 // TODO 与上面height <= 0重复，代码需精简
                 child.visible = false;
@@ -161,10 +161,10 @@ export default class Trunk {
                 let h = Math.floor(height * i / times);
                 this._setHeight(child, h);
                 i++;
-            }else if(i === times) {
+            } else if(i === times) {
                 i++;
                 this._setHeight(child, height);
-            }else {
+            } else {
                 clearInterval(sh);
                 delete this._intervals[sh];
             }
@@ -261,22 +261,20 @@ export default class Trunk {
             let uuid = this._current && this._current.uuid;
             if(uuid === child.uuid) {
                 return;
-            }else {
-                if(!uuid) { // 第一次
-                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)) {
+            } else {
+                if(!/border$/.test(child.name) && !/Line$/.test(child.name) && !/pillar$/.test(child.name)) {
+                    if(!uuid) { // 第一次
                         this._current = child;
                         
                         // 鼠标移入设置移入的颜色
                         child.material.color.set(texture.select);
-                    }
-                }else {
-                    if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)) {
+                    } else {
                         // 鼠标移开设置原先表面的颜色
                         this._current.material.color.set(texture.top);
-    
+                            
                         this._old = this._current;
                         this._current = child;
-                        
+
                         // 鼠标移入设置移入的颜色
                         child.material.color.set(texture.select);
                     }
@@ -439,7 +437,7 @@ export default class Trunk {
 
             // 改变模型贴图
             switch(last_name) {
-                case 'line': // 内部乡镇边界贴图
+                case 'Line': // 内部乡镇边界贴图
                     child.material.color.set(texture.line);
                 break;
 
@@ -521,7 +519,7 @@ export default class Trunk {
      */
     _load_materials = (paths, loader, material, callback) => {
         loader.load(paths[0], materials => {
-            material ? material.materialsInfo = extend(material.materialsInfo, materials.materialsInfo) : material = materials;
+            material ? material.materialsInfo = [...material.materialsInfo, ...materials.materialsInfo] : material = materials;
 
             paths.shift();
 
@@ -625,7 +623,7 @@ export default class Trunk {
             }
             if(child instanceof Mesh) {
                 child.geometry = new Geometry().fromBufferGeometry(child.geometry);
-            }else if(child instanceof Line) {
+            } else if(child instanceof Line) {
                 console.log(child.name)
             }
 

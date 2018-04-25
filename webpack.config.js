@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
-    Trunk: './main.js',
+    Trunk: './main.js'
   },
   output: {
     filename: 'Trunk.js'
@@ -18,8 +18,7 @@ module.exports = {
             presets: ['es2015', 'stage-0']
           }
         }
-      },
-      {
+      }, {
         test: /\.(png|jpg)$/,
         use: [
           {
