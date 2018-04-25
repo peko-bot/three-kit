@@ -3,33 +3,29 @@ import * as THREE from 'three'
 
 let trunk = new Trunk();
 
-var refresh_pillar = document.getElementById('refreshPillar');
-    refresh_pillar.addEventListener('click', function() {
-        search();
-    }, false);
+let refresh_pillar = document.getElementById('refreshPillar');
+    refresh_pillar.addEventListener('click', () => search(), false);
 
 // 显示等值面
-var timeline = document.getElementById('timeline');
-timeline.addEventListener('click', function() {
+let timeline = document.getElementById('timeline');
+timeline.addEventListener('click', () => {
     trunk.show_texture({ transparent: true, opacity: 0.5 }, './data/images/20180404100000_20180416100000.png');
 }, false);
 
 trunk.init({
     container: document.getElementById('container'), // 画布挂载节点
     // clear_color: 0x4584b4, // 画布颜色
-    mesh_shift_time: function() { // 定义各板块移动速度
-        return 2000;
-    },
+    mesh_shift_time: () => 2000, // 定义各板块移动速度
     child_mapping: child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
-    set_material: function(materials) {
+    clientWidth: 1158,
+    clientHeight: 568,
+    set_material: materials => {
         let info = materials.materialsInfo;
         for(let key in info) {
             let value = info[key];
 
             // 初始化等值面
-            if(key == 'texture') {
-                value.map_d = value.map_ka = value.map_kd = './data/images/20180413180000_20180416180000.png';
-            }
+            key == 'texture' && (value.map_d = value.map_ka = value.map_kd = './data/images/20180413180000_20180416180000.png');
         }
 
         return materials;
@@ -37,11 +33,9 @@ trunk.init({
     data: {
         materials: ['./data/model/deqing05.mtl'],
         objects: ['./data/model/deqing05.obj'],
-        load: (object, goon) => {
-            search(object, goon);
-        }
+        load: (object, goon) => search(object, goon)
     },
-    show_detail: function(child) { // 这方法主要是把点击的模型传出来，具体要做什么自己写
+    show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
         let detail = document.getElementById('detail');
 
         // 当点到边界或者柱子的时候不移动模型
@@ -69,8 +63,8 @@ trunk.init({
         minPolarAngle: Math.PI * 0.25,
         maxDistance: 200,
         minDistance: 70,
-        maxAzimuthAngle: 0, // 不能右旋转
-        minAzimuthAngle: 0 // 不能左旋转
+        maxAzimuthAngle: 0, // 不能右旋
+        minAzimuthAngle: 0 // 不能左旋
     }
 });
 
@@ -99,8 +93,8 @@ function child_mapping(child) {
             break;
 
             case 'pillar': // 柱子贴图
-                // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
-                child.material.map = new THREE.CanvasTexture(get_text_canvas('测试', '#000'));
+                child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
+                // child.material.map = new THREE.CanvasTexture(get_text_canvas('测试', '#000'));
                 child.material.color.set(texture.pillar);
             break;
 
@@ -128,12 +122,8 @@ function search(object, goon) {
         return response.json();
     }).then(result => {
         object = object ? object : trunk.get_object();
-        for(var i = 0; i < result.length; i++) { // 处理业务数据和模型数据，使板块和表格数据对应
-            var item = result[i];
-
-            for(var j = 0; j < object.children.length; j++) {
-                var jtem = object.children[j];
-
+        for(let item of result) { // 处理业务数据和模型数据，使板块和表格数据对应
+            for(let jtem of object.children) {
                 if(item.stcd == jtem.name.split('_')[0]) {
                     // 这个userData很关键，
                     // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
@@ -147,11 +137,11 @@ function search(object, goon) {
 
 // 创建柱子贴图
 function get_text_canvas(text, style) {
-    var canvas = document.createElement('canvas');
+    let canvas = document.createElement('canvas');
     canvas.width = 300;
     canvas.height = 300;
 
-    var context = canvas.getContext( '2d' );
+    let context = canvas.getContext( '2d' );
     context.beginPath();
     context.font='50px Microsoft YaHei';
     context.fillStyle = style;
@@ -164,8 +154,8 @@ function get_text_canvas(text, style) {
 
 // 创建表格元素
 function createTable(child, element) {
-    var data = Object.assign({ stnm: '-', val: '-' }, child.userData);
-    var table = '', decorate = '';
+    let data = Object.assign({ stnm: '-', val: '-' }, child.userData);
+    let table = '', decorate = '';
 
     table += 
     '<table border="0" cellspacing="0" cellpadding="0" class="detail-table">' +

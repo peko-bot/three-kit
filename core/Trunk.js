@@ -16,9 +16,7 @@ export default class Trunk {
     config = {
         // clear_color: 0x4584b4, // 画布颜色
         clear_opacity: 0.2, // 画布透明度
-        mesh_shift_time: function() { // 板块移动时间
-            return Math.random() * 1000 * 5 + 1000;
-        },
+        mesh_shift_time: () => Math.random() * 1000 * 5 + 1000, // 板块移动时间
         before_init: null, // 初始化前的钩子
         border_visible: true, // 边界是否显示
         divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
@@ -30,7 +28,7 @@ export default class Trunk {
             border: '#EBC9AE', // 边缘边界贴图
             select: '#071C5B', // 鼠标移入时贴图
         },
-        light: function() { // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
+        light: () => { // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
             let lights = [];
 
             let ambientLight = new AmbientLight('white');
@@ -38,7 +36,8 @@ export default class Trunk {
 
             return lights;
         },
-
+        clientWidth: document.documentElement.clientWidth || document.body.clientWidth,
+        clientHeight: document.documentElement.clientHeight || document.body.clientHeight
     };
 
     _startPositions = {};
@@ -62,8 +61,8 @@ export default class Trunk {
     // 模型数据
     dataObject;
     
-    clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
-    clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+    // clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
+    // clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
     
     // 多次用到容器节点，存到全局变量里方便调用
     container = {};
@@ -77,7 +76,7 @@ export default class Trunk {
     scene = null;
 
     // 初始化开场动画前板块位置
-    _initAreaPosition(area, child) {
+    _initAreaPosition = (area, child) => {
         let { _startPositions } = this;
 
         let p = _startPositions[area];
@@ -93,7 +92,7 @@ export default class Trunk {
     }
 
     // 处理开场动画参数
-    _dealObjectInLoadCirculStart(child, visible) {
+    _dealObjectInLoadCirculStart = (child, visible) => {
         if(!child.name) {
             return;
         }
@@ -113,7 +112,7 @@ export default class Trunk {
      * @param child 当前遍历模型对象
      * @param divisor 计算柱子高度，柱子高度 = 当前模型中数据 / divisor * 15，也就是说divisor越小，柱子越高
     */
-    _changeModel4DataRefresh(child, divisor) {
+    _changeModel4DataRefresh = (child, divisor) => {
         let name = child.name;
         
         if(/pillar$/.test(name)) {
@@ -150,7 +149,7 @@ export default class Trunk {
      * @param height
      * @private
      */
-    _setHeightSlow(child, height) {
+    _setHeightSlow = (child, height) => {
         this._setHeight(child, 1);
         let i = 1;
         let sh;
@@ -182,7 +181,7 @@ export default class Trunk {
      * @param height
      * @private
      */
-    _setHeight(child, height) {
+    _setHeight = (child, height) => {
         if(height === 0 || isNaN(height)) {
             // 不能高度设置为0，否则下一次设置的时候会出问题，
             height = 1;
@@ -203,15 +202,14 @@ export default class Trunk {
             然后底面的z不变，顶面的z加高度
         */
         let minz = vertices[0].z;
-        for (let i = 1, size = vertices.length; i < size; i++) {
-            let z = vertices[i].z;
+        for (let vertice of vertices) {
+            let z = vertice.z;
             if(minz != z) {
                 minz = Math.min(z, minz);
                 break;
             }
         }
-        for (let i = 0, size = vertices.length; i < size; i++) {
-            let vertice = vertices[i];
+        for (let vertice of vertices) {
             if(vertice.z !== minz) {
                 vertice.z = minz + height;
             }
@@ -234,7 +232,7 @@ export default class Trunk {
      * @param config 模型配置文件
      * @param object .obj文件，所有模型数据。这里得注意跟child的区别，变量名写惯了都是object..
      */
-    _initListener(object) {
+    _initListener = object => {
         this.container.addEventListener('mousemove', e => {
             return this._setMeshHighLightStatus(e);
         }, false);
@@ -251,7 +249,7 @@ export default class Trunk {
         移开后恢复原来的材质
         得注意边界线也是种模型，需要额外判断
     */
-    _setMeshHighLightStatus(event) {
+    _setMeshHighLightStatus = event => {
         const { config } = this;
         let intersected = this._objectFromMouse(event.pageX, event.pageY);
         let child = intersected.object;
@@ -288,7 +286,7 @@ export default class Trunk {
     }
 
     // 点击板块，板块左移，右边空出来的地方显示表格
-    _showDetail(event, object) {
+    _showDetail = (event, object) => {
         const { config } = this;
         event.preventDefault();
 
@@ -305,7 +303,7 @@ export default class Trunk {
     }
 
     // 获得鼠标位置的板块模型对象
-    _objectFromMouse(pagex, pagey) {
+    _objectFromMouse = (pagex, pagey) => {
         let { container } = this;
 
         let offset = this._getOffset(this.renderer.domElement);
@@ -332,7 +330,7 @@ export default class Trunk {
     }
 
     // 获得元素相对整个页面的偏移量
-    _getOffset(node, offset) {
+    _getOffset = (node, offset) => {
         if(!offset) {
             offset = {};
             offset.top = 0;
@@ -357,7 +355,7 @@ export default class Trunk {
      * @param withdraw 是否移开
      * @private
      */
-    _meshMove(withdraw, object) {
+    _meshMove = (withdraw, object) => {
         let { camera, renderer, container } = this;
         let point = { x: 0, y: 0, z: 0 };
         let rotation = { x: -Math.PI / 4, y: 0, z: 0 };
@@ -388,7 +386,7 @@ export default class Trunk {
     };
     
     // 获得模型宽度
-    getMeshWidth(object) {
+    getMeshWidth = object => {
         let c = 16711680, length = 0, width = 0, height = 0;
         let boxHelper = new BoxHelper(object, c);
         let box = new Box3().setFromObject(object);
@@ -407,7 +405,7 @@ export default class Trunk {
     }
 
     // 定义各板块移动速度
-    _handle_model_shift(child) {
+    _handle_model_shift = child => {
         let { _startPositions, config } = this;
 
         let name = child.name.split('_');
@@ -425,7 +423,7 @@ export default class Trunk {
      * 遍历所有模型对象时的回调 
      * @param {*} child 当前遍历模型
      */
-    child_mapping(child) {
+    child_mapping = child => {
         let { config } = this;
 
         if(config.child_mapping) {
@@ -466,7 +464,7 @@ export default class Trunk {
     }
 
     // 计算模型移动距离
-    _getCoordinate2InScene(i, d, c) {
+    _getCoordinate2InScene = (i, d, c) => {
         d.updateMatrixWorld(true);
 
         let b = this.getVector2InScene(i, c);
@@ -488,7 +486,7 @@ export default class Trunk {
         return a;
     }
 
-    getVector2InScene(a, c) {
+    getVector2InScene = (a, c) => {
         let b = new Vector2();
         b.x = (a.x / c.offsetWidth) * 2 - 1;
         b.y = -(a.y / c.offsetHeight) * 2 + 1;
@@ -503,7 +501,7 @@ export default class Trunk {
      * @param c 动画加载完成回调
      * @param s 动画开始回调
      */
-    _tweenInOut(a, b, t, c, s) {
+    _tweenInOut = (a, b, t, c, s) => {
         let tween = new TWEEN.Tween(a)
             .to(b, t)
             .easing(TWEEN.Easing.Exponential.InOut);
@@ -522,7 +520,7 @@ export default class Trunk {
      * @param {*} callback 加载完成后的回调，相当于ajax里的success，传回材质对象
      */
     _load_materials = (paths, loader, material, callback) => {
-        loader.load(paths[0], function(materials) {
+        loader.load(paths[0], materials => {
             material ? material.materialsInfo = extend(material.materialsInfo, materials.materialsInfo) : material = materials;
 
             paths.shift();
@@ -540,7 +538,7 @@ export default class Trunk {
      * @param {*} callback 加载完成后的回调，相当于ajax里的success，传回模型对象
      */
     _load_objects = (paths, loader, object, callback) => {
-        loader.load(paths[0], function(objects) {
+        loader.load(paths[0], objects => {
             object ? object.children = objects.children.concat(object.children) : object = extend({}, objects);
 
             paths.shift();
@@ -553,7 +551,8 @@ export default class Trunk {
      * 初始化参数
     */
     _init_params = () => {
-        const { clientWidth, clientHeight, config } = this;
+        const { config } = this;
+        const { clientWidth, clientHeight } = config;
 
         // 挂载画布的dom
         this.container = config.container;
@@ -596,7 +595,7 @@ export default class Trunk {
      * 一种是旋转mesh，一种是改变相机位置
      * 这是旋转mesh
      */
-    _afterMovementMesh() {
+    _afterMovementMesh = () => {
         // 视角转动速度
         let speed = 0.02;
 
@@ -617,7 +616,7 @@ export default class Trunk {
      * 预处理模型数据
      * @param object 模型数据
     */
-    _handle_mesh(object) {
+    _handle_mesh = object => {
         let { config, _startTweenCount } = this;
 
         object.traverse(child => {
@@ -676,7 +675,7 @@ export default class Trunk {
      * TODO 根据传入对象判断哪些对象需要更新
      * @param {*} object 新的模型对象
      */
-    refresh_pillar(object) {
+    refresh_pillar = object => {
         let { dataObject } = this;
 
         dataObject = object;
@@ -684,7 +683,7 @@ export default class Trunk {
     }
 
     // 渲染柱子
-    render_pillar(obj) {
+    render_pillar = obj => {
         const { config } = this;
 
         obj.traverse(child => {
@@ -692,7 +691,7 @@ export default class Trunk {
         });
     }
 
-    init(_config) {
+    init = _config => {
         let { config } = this;
         // TODO 去掉加载材质和模型方法的副作用
         config = extend(this.config, _config);

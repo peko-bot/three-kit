@@ -45,8 +45,10 @@
 | child_mapping | 手动设置模型贴图，可以理解为遍历模型数据时的回调 | Function, (child, config) => {} | 无 |
 | light | 初始化光线，需要手动return光线实例数组 | Function, () => { return []; } | 白色环境光 |
 | show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的。返回值控制模型是否移动 | Function, (child) => { return Boolean; } | 无 |
-| controls | 轨道控制参数。想看中文文档就去搜一下OrbitControls，直接一点就看./third/three/controls/OrbitControls | {} | 无 |
+| controls | 轨道控制参数。相关参数搜一下OrbitControls | {} | 无 |
 | data | 加载模型及业务数据，具体参数见下 | {} | 无 |
+| clientWidth | 画布宽度 | Number | document.body.clientWidth |
+| clientHeight | 画布高度 | Number | document.body.clientHeight |
 * 关于画布，默认是透明的，也就是白的。要改变背景颜色，一种是给clear_color和clear_opacity赋值，另一种是修改容器的background
 
 ## Trunk.init(config) -> config.勾子(生命周期)
