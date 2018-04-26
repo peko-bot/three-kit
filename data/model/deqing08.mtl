@@ -1,15 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½:16.04.2018 17:10:17
-
-newmtl wire_143225087
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
-	illum 2
-	Ka 0.5608 0.8824 0.3412
-	Kd 0.5608 0.8824 0.3412
-	Ks 0.3500 0.3500 0.3500
+# ´´½¨µÄÎÄ¼þ:26.04.2018 11:27:29
 
 newmtl wire_141007058
 	Ns 32
@@ -19,16 +9,6 @@ newmtl wire_141007058
 	illum 2
 	Ka 0.5529 0.0275 0.2275
 	Kd 0.5529 0.0275 0.2275
-	Ks 0.3500 0.3500 0.3500
-
-newmtl wire_153228184
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
-	illum 2
-	Ka 0.6000 0.8941 0.7216
-	Kd 0.6000 0.8941 0.7216
 	Ks 0.3500 0.3500 0.3500
 
 newmtl wire_214228153
@@ -121,7 +101,47 @@ newmtl wire_145028177
 	Kd 0.5686 0.1098 0.6941
 	Ks 0.3500 0.3500 0.3500
 
-newmtl texture
+newmtl wire_006135058
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.0235 0.5294 0.2275
+	Kd 0.0235 0.5294 0.2275
+	Ks 0.3500 0.3500 0.3500
+
+newmtl wire_177088027
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.6941 0.3451 0.1059
+	Kd 0.6941 0.3451 0.1059
+	Ks 0.3500 0.3500 0.3500
+
+newmtl wire_177027088
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.6941 0.1059 0.3451
+	Kd 0.6941 0.1059 0.3451
+	Ks 0.3500 0.3500 0.3500
+
+newmtl wire_008008136
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.0314 0.0314 0.5333
+	Kd 0.0314 0.0314 0.5333
+	Ks 0.3500 0.3500 0.3500
+
+newmtl tietu
 	Ns 10.0000
 	Ni 1.5000
 	d 1.0000
@@ -132,3 +152,16 @@ newmtl texture
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\11859\Desktop\texture.png
+	map_Kd C:\Users\11859\Desktop\texture.png
+	map_d C:\Users\11859\Desktop\texture.png
+
+newmtl wire_229154215
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.8980 0.6039 0.8431
+	Kd 0.8980 0.6039 0.8431
+	Ks 0.3500 0.3500 0.3500

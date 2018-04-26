@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:34:46 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-25 16:56:27
+ * @Last Modified time: 2018-04-25 17:01:28
  */
 import Trunk from './core/Trunk'
 import * as THREE from 'three'
@@ -41,8 +41,8 @@ trunk.init({
         return materials;
     },
     data: {
-        materials: ['./data/model/deqing05.mtl'],
-        objects: ['./data/model/deqing05.obj'],
+        materials: ['./data/model/deqing08.mtl'],
+        objects: ['./data/model/deqing08.obj'],
         load: (object, goon) => search(object, goon)
     },
     show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
@@ -92,6 +92,7 @@ function child_mapping(child) {
             pillar: '#2377e8', // 柱子贴图
             top: '#07205b', // 上表面贴图
             border: '#2a8fdf', // 边缘边界贴图
+            area: '#092573', // 柱子底下的圆
         };
 
         // 改变模型贴图
@@ -112,6 +113,14 @@ function child_mapping(child) {
 
             case 'texture': // 等值面
                 child.visible = false;
+            break;
+
+            case 'bottom': // 底面
+
+            break;
+
+            case 'area': // 柱子下的圆
+                child.material.color.set(texture.area);
             break;
 
             default: // 顶面贴图

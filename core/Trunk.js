@@ -59,10 +59,7 @@ export default class Trunk {
     _meshTween = null;
     
     // 模型数据
-    dataObject;
-    
-    // clientWidth = document.documentElement.clientWidth || document.body.clientWidth;
-    // clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+    dataObject = {};
     
     // 多次用到容器节点，存到全局变量里方便调用
     container = {};
@@ -233,13 +230,9 @@ export default class Trunk {
      * @param object .obj文件，所有模型数据。这里得注意跟child的区别，变量名写惯了都是object..
      */
     _initListener = object => {
-        this.container.addEventListener('mousemove', e => {
-            return this._setMeshHighLightStatus(e);
-        }, false);
+        this.container.addEventListener('mousemove', e => this._setMeshHighLightStatus(e), false);
 
-        this.container.addEventListener('click', e => {
-            return this._showDetail(e, object);
-        }, false);
+        this.container.addEventListener('click', e => this._showDetail(e, object), false);
     };
     
     /* 
@@ -262,7 +255,7 @@ export default class Trunk {
             if(uuid === child.uuid) {
                 return;
             } else {
-                if(!/border$/.test(child.name) && !/Line$/.test(child.name) && !/pillar$/.test(child.name)) {
+                if(!/border$/.test(child.name) && !/Line$/.test(child.name) && !/pillar$/.test(child.name) && !/area$/.test(child.name)) {
                     if(!uuid) { // 第一次
                         this._current = child;
                         
@@ -395,11 +388,7 @@ export default class Trunk {
         width = box.max.y - box.min.y;
         height = box.max.z - box.min.z;
 
-        return {
-            length: length,
-            width: width,
-            height: height
-        };
+        return { length, width, height };
     }
 
     // 定义各板块移动速度
@@ -488,6 +477,7 @@ export default class Trunk {
         let b = new Vector2();
         b.x = (a.x / c.offsetWidth) * 2 - 1;
         b.y = -(a.y / c.offsetHeight) * 2 + 1;
+
         return b;
     };
 
@@ -506,6 +496,7 @@ export default class Trunk {
 
         c && tween.onComplete(c);
         s && tween.onStart(s);
+
         return tween.start();
     };
 
@@ -562,7 +553,7 @@ export default class Trunk {
         
         // 设置画布透明
         this.renderer = new WebGLRenderer({
-            alpha:true,
+            alpha: true,
             antialias: true
         });
         this.renderer.setSize(clientWidth, clientHeight - 4);
@@ -681,10 +672,10 @@ export default class Trunk {
     }
 
     // 渲染柱子
-    render_pillar = obj => {
+    render_pillar = object => {
         const { config } = this;
 
-        obj.traverse(child => {
+        object.traverse(child => {
             this._changeModel4DataRefresh(child, config.divisor);
         });
     }

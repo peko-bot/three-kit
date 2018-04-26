@@ -1,6 +1,7 @@
 var webpack = require('webpack');
 
 module.exports = {
+  devtool: 'source-map',
   entry: {
     Trunk: './main.js'
   },
@@ -30,5 +31,8 @@ module.exports = {
         ]
       }
     ]
+  },
+  devServer: {
+    port: 9099
   }
 };
