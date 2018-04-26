@@ -6,6 +6,7 @@ module.exports = {
     Trunk: './main.js'
   },
   output: {
+    path: __dirname  + '/dist',
     filename: 'Trunk.js'
   },
   module: {

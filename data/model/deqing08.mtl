@@ -1,5 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# ╢╢╫╗╣днд╪Ч:26.04.2018 11:27:29
+# О©╫О©╫О©╫О©╫О©╫О©╫О©╫д╪О©╫:26.04.2018 11:27:29
 
 newmtl wire_141007058
 	Ns 32
@@ -141,7 +141,7 @@ newmtl wire_008008136
 	Kd 0.0314 0.0314 0.5333
 	Ks 0.3500 0.3500 0.3500
 
-newmtl tietu
+newmtl texture
 	Ns 10.0000
 	Ni 1.5000
 	d 1.0000
@@ -152,9 +152,6 @@ newmtl tietu
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka C:\Users\11859\Desktop\texture.png
-	map_Kd C:\Users\11859\Desktop\texture.png
-	map_d C:\Users\11859\Desktop\texture.png
 
 newmtl wire_229154215
 	Ns 32

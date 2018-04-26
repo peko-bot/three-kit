@@ -9,8 +9,9 @@ import * as THREE from 'three'
 
 let trunk = new Trunk();
 
+// 刷新数据和柱子
 let refresh_pillar = document.getElementById('refreshPillar');
-    refresh_pillar.addEventListener('click', () => search(), false);
+refresh_pillar.addEventListener('click', () => search(), false);
 
 // 显示等值面
 let timeline = document.getElementById('timeline');

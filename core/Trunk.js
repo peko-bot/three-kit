@@ -296,10 +296,10 @@ export default class Trunk {
     // 获得鼠标位置的板块模型对象
     _objectFromMouse = (pagex, pagey) => {
         let { container } = this;
+        let { offsetLeft, offsetTop } = this.renderer.domElement;
 
-        let offset = this._getOffset(this.renderer.domElement);
-        let eltx = pagex - offset.left;
-        let elty = pagey - offset.top;
+        let eltx = pagex - offsetLeft;
+        let elty = pagey - offsetTop;
 
         let vpx = (eltx / container.offsetWidth) * 2 - 1;
         let vpy = -(elty / container.offsetHeight) * 2 + 1;
