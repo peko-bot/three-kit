@@ -1,16 +1,14 @@
-# three-demo-simple
-- 重写自[这里](https://github.com/zy410419243/three-demo)  
+# three-kit
+- Three.js的一实现封装
   
-- 文件引入用的require.js，至少调试的时候不会像老版那样伤眼  
-  
-- three升级至r91dev，api跟官方文档能对上了
-  
-# 怎么看demo
-  clone下来，部署到本地服务器，打开index.html即可  
+# 用法
+  git clone https://github.com/zy410419243/three-kit.git
+
+  npm install
+
+  npm start
     
-  比如我发布到IIS上，端口9005，最后在地址栏输入 http://localhost:9005 即可（IIS默认打开文件index.html） 
-    
-  用法也在demo里，因为代码挺长就不贴了
+  在地址栏输入http://localhost:9099 即可
 
 ## 效果图
 ![img](./gif/demo.gif)  
