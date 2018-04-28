@@ -2,13 +2,36 @@
 - Three.js的一实现封装
   
 # 用法
+* 热编译
+``` bash
   git clone https://github.com/zy410419243/three-kit.git
 
   npm install
 
   npm start
-    
+
   在地址栏输入http://localhost:9099 即可
+```
+
+* 静态部署
+``` bash
+  npm run bulid
+
+  把/dist部署到服务器上运行即可
+```
+
+* 用在react里  
+(假设component和modules同级)    
+复制/core/Trunk、/assets、/util、/third到/component/three下，那么在使用时/modules/Three-demo.js
+``` javascript
+  import Trunk from '../component/three/core/Trunk'
+
+  ComponentDidMount = () => {
+    let trunk = new Trunk();
+
+    trunk.init(config);
+  }
+```
 
 ## 效果图
 ![img](./gif/demo.gif)  
@@ -43,10 +66,12 @@
 | child_mapping | 手动设置模型贴图，可以理解为遍历模型数据时的回调 | Function, (child, config) => {} | 无 |
 | light | 初始化光线，需要手动return光线实例数组 | Function, () => { return []; } | 白色环境光 |
 | show_detail | 这方法主要是把点击的模型传出来，具体要做什么自己写，没这个方法点击板块是没反应的。返回值控制模型是否移动 | Function, (child) => { return Boolean; } | 无 |
-| controls | 轨道控制参数。相关参数搜一下OrbitControls | {} | 无 |
+| controls | 轨道控制参数。相关参数搜一下OrbitControls | {} | { maxPolarAngle: Math.PI * 0.75, minPolarAngle: Math.PI * 0.25, } |
 | data | 加载模型及业务数据，具体参数见下 | {} | 无 |
 | clientWidth | 画布宽度 | Number | document.body.clientWidth |
 | clientHeight | 画布高度 | Number | document.body.clientHeight |
+| camera_position | 相机初始位置，设置z就够了，camera.position.z | Number | 65 |
+| rotation_speed | 开场动画结束后，视角旋转的速度 | Float | 0.02 |
 * 关于画布，默认是透明的，也就是白的。要改变背景颜色，一种是给clear_color和clear_opacity赋值，另一种是修改容器的background
 
 ## Trunk.init(config) -> config.勾子(生命周期)
@@ -83,8 +108,9 @@
 * top_border是模型顶面边界，bottom_border是模型底面边界  
 * hangzhou_pillar是板块中心的柱子
 * texture用来贴等值面，实际上就是原先的模型复制一下轮廓
-* 换句话说，obj文件里的名字只能是line、top_border、bottom_border、hangzhou 、hangzhou_bottom、hangzhou_pillar、texture，别的咱不管
+* area是柱子底下的圆
+* 换句话说，obj文件里的名字只能是line、top_border、bottom_border、hangzhou 、hangzhou_bottom、hangzhou_pillar、texture、hangzhou_area，别的咱不管
   
-嚷嚷这么多东西，其实用到的可能就只有改变材质的时候会用到这些概念
+嚷嚷这么多东西，其实用到的可能就只有改变材质的时候会用到这些概念，不懂是完全没问题的
 
 # License MIT

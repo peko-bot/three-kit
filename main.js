@@ -1,8 +1,8 @@
 /*
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:34:46 
- * @Last Modified by:   zy9 
- * @Last Modified time: 2018-04-28 11:48:03 
+ * @Last Modified by: zy9
+ * @Last Modified time: 2018-04-28 15:27:04
  */
 import Trunk from './core/Trunk'
 import * as THREE from 'three'
@@ -74,7 +74,7 @@ window.onload = () => {
             maxPolarAngle: Math.PI * 0.75,
             minPolarAngle: Math.PI * 0.25,
             maxDistance: 200,
-            minDistance: 70,
+            minDistance: 65,
             maxAzimuthAngle: 0, // 不能右旋
             minAzimuthAngle: 0 // 不能左旋
         }

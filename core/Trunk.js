@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:33:50 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-25 16:51:34
+ * @Last Modified time: 2018-04-28 16:27:19
  */
 import { Vector2, Vector3,  AmbientLight, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture } from 'three'
 import MTLLoader from '../third/three/loader/MTLLoader'
@@ -20,6 +20,8 @@ export default class Trunk {
         before_init: null, // 初始化前的钩子
         border_visible: true, // 边界是否显示
         divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
+        camera_position: 65, // 相机position中的z
+        rotation_speed: 0.02, // 开场动画后的视角旋转速度
         texture: {
             line: '#055290', // 内部乡镇边界贴图
             pillar: '#2377e8', // 柱子贴图
@@ -35,6 +37,10 @@ export default class Trunk {
             lights.push(ambientLight)
 
             return lights;
+        },
+        controls: {
+            maxPolarAngle: Math.PI * 0.75,
+            minPolarAngle: Math.PI * 0.25,
         },
         clientWidth: document.documentElement.clientWidth || document.body.clientWidth,
         clientHeight: document.documentElement.clientHeight || document.body.clientHeight
@@ -55,8 +61,6 @@ export default class Trunk {
     root = {};
     // 标识模型是否移动过
     _withdrawPosition = false;
-    // 处理模型移动的方法
-    _meshTween = null;
     
     // 模型数据
     dataObject = {};
@@ -213,16 +217,6 @@ export default class Trunk {
         }
     };
 
-    // 实时渲染
-    _flush = () => {
-        const render = () => {
-            requestAnimationFrame(render);
-            TWEEN.update();
-            this.renderer.render(this.scene, this.camera);
-        }
-        render();
-    }
-    
     /**
      * 事件绑定
      * @private
@@ -296,7 +290,7 @@ export default class Trunk {
     // 获得鼠标位置的板块模型对象
     _objectFromMouse = (pagex, pagey) => {
         let { container } = this;
-        let { offsetLeft, offsetTop } = this.renderer.domElement;
+        const { offsetLeft, offsetTop } = this.renderer.domElement;
 
         let eltx = pagex - offsetLeft;
         let elty = pagey - offsetTop;
@@ -347,7 +341,7 @@ export default class Trunk {
      * @private
      */
     _meshMove = (withdraw, object) => {
-        let { camera, renderer, container } = this;
+        let { camera, renderer, container, getMeshWidth, _getCoordinate2InScene, config } = this;
         let point = { x: 0, y: 0, z: 0 };
         let rotation = { x: -Math.PI / 4, y: 0, z: 0 };
 
@@ -358,22 +352,27 @@ export default class Trunk {
             let gap = container.clientWidth / 550;
             // 算移开的位置，移开的位置是固定的，只算一遍
             if(!this._withdrawPosition) {
-                this._withdrawPosition = this._getCoordinate2InScene({
+                this._withdrawPosition = _getCoordinate2InScene({
                     x: 30 * gap,
                     y: renderer.domElement.offsetHeight / 2
                 }, camera, renderer.domElement);
 
-                // x 的位置需要加上模型长的一半，避免飞出
-                this._withdrawPosition.x += this.getMeshWidth(object).length / 2;
+                // 避免飞出
+                this._withdrawPosition.x += getMeshWidth(object).length / 4;
             }
             point = this._withdrawPosition;
-        }
 
-        if(this._meshTween) {
-            TWEEN.remove(this._meshTween);
-            this._meshTween = null;
+            this._tweenInOut(camera.position, { z: 100 }, 1000);
+            this._tweenInOut(object.position, point, 1000);
+        } else {
+            /* 在开场动画结束后，模型需要填满整个页面，但点击板块显示详情时会出现空间不够的情况
+            于是这里除了改变模型水平位置，还需要改变相机位置给详情腾地方
+            
+            至于为什么不改变模型的z...因为还有个轨道控制。如果改变了y，但模型仍旧是照着x轴旋转的，
+            这就会造成模型转出屏幕的问题*/
+            this._tweenInOut(camera.position, { z: config.camera_position }, 1000);
+            this._tweenInOut(object.position, point, 1000);
         }
-        this._meshTween = this._tweenInOut(object.position, { x: point.x, y: 0, z: 0 }, 1000);
     };
     
     // 获得模型宽度
@@ -541,7 +540,7 @@ export default class Trunk {
     */
     _init_params = () => {
         const { config } = this;
-        const { clientWidth, clientHeight } = config;
+        const { clientWidth, clientHeight, camera_position } = config;
 
         // 挂载画布的dom
         this.container = config.container;
@@ -549,7 +548,7 @@ export default class Trunk {
         // 相机视锥体的长宽比
         const _camera_aspect = clientWidth / clientHeight;
         this.camera = new PerspectiveCamera(45, _camera_aspect, 1, 10000);
-        this.camera.position.z = 100;
+        this.camera.position.z = camera_position;
         
         // 设置画布透明
         this.renderer = new WebGLRenderer({
@@ -576,7 +575,7 @@ export default class Trunk {
         }
      
         // 设置背景颜色
-        config.clear_color && renderer.setClearColor(config.clear_color, config.clear_opacity);
+        config.clear_color && this.renderer.setClearColor(config.clear_color, config.clear_opacity);
     }
 
     /**
@@ -585,16 +584,11 @@ export default class Trunk {
      * 这是旋转mesh
      */
     _afterMovementMesh = () => {
-        // 视角转动速度
-        let speed = 0.02;
-
         const rotateAnimate = () => {
             requestAnimationFrame(rotateAnimate);
             
-            // y轴正半轴朝上，这方法用作除抖
-            // root.position.y <= 0 ? root.position.y += 0.8 : null;
             // 沿x轴旋转
-            this.root.rotation.x >= -Math.PI / 4 ? this.root.rotation.x -= speed : null;
+            this.root.rotation.x >= -Math.PI / 4 ? this.root.rotation.x -= this.config.rotation_speed : null;
             this.renderer.render(this.scene, this.camera);
         };
 
@@ -708,7 +702,13 @@ export default class Trunk {
                     this.root = new Object3D().add(new_object);
                     this.scene.add(this.root);
                     
-                    this._flush();
+                    // 实时渲染
+                    const render = () => {
+                        requestAnimationFrame(render);
+                        TWEEN.update();
+                        this.renderer.render(this.scene, this.camera);
+                    }
+                    render();
                 });
             })
         });
