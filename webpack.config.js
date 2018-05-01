@@ -27,7 +27,7 @@ module.exports = {
       const newlyCreatedAssets = stats.compilation.assets;
 
       fs.readdir(path.resolve(buildPath), (err, files) => {
-        files.forEach(file => {
+        files && files.forEach(file => {
           if (!newlyCreatedAssets[file]) {
             fs.unlink(path.resolve(buildPath + file), () => {});
           }
