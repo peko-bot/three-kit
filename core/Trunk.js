@@ -249,7 +249,7 @@ export default class Trunk {
             if(uuid === child.uuid) {
                 return;
             } else {
-                if(!/border$/.test(child.name) && !/Line$/.test(child.name) && !/pillar$/.test(child.name) && !/area$/.test(child.name)) {
+                if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name) && !/area$/.test(child.name)) {
                     if(!uuid) { // 第一次
                         this._current = child;
                         

@@ -44,8 +44,8 @@ window.onload = () => {
             return materials;
         },
         data: {
-            materials: ['./assets/data/model/deqing09.mtl'],
-            objects: ['./assets/data/model/deqing09.obj'],
+            materials: ['./assets/data/model/deqing10.mtl'],
+            objects: ['./assets/data/model/deqing10.obj'],
             load: (object, goon) => search(object, goon)
         },
         show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
@@ -142,13 +142,12 @@ function search(object, goon) {
     }).then(result => {
         object = object ? object : trunk.get_object();
 
-        let data = { area_name: '', val: ''};
         for(let item of result.data) { // 处理业务数据和模型数据，使板块和表格数据对应
             for(let jtem of object.children) {
                 if(item.area_code == jtem.name.split('_')[0]) {
                     // 这个userData很关键，
                     // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
-                    jtem.userData = Object.assign(data, item);
+                    jtem.userData = Object.assign({ area_name: '', val: '', area_code: '' }, item);
                 }
             }
         }
@@ -175,7 +174,7 @@ function get_text_canvas(text, style) {
 
 // 创建表格元素
 function createTable(child, element) {
-    let data = Object.assign({ area_name: '-', val: '-' }, child.userData);
+    let data = Object.assign({ area_name: '', val: '', area_core: '' }, child.userData);
     let table = '', decorate = '';
 
     table += 
