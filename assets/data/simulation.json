@@ -1,51 +1,59 @@
-﻿[
-    {
-        "stcd": "shuyue",
-        "stnm": "禹越",
-        "val": 2100
-    },{
-        "stcd": "fatou",
-        "stnm": "筏头",
-        "val": 1000
-    },{
-        "stcd": "wukang",
-        "stnm": "武康",
-        "val": 2000
-    },{
-        "stcd": "moganshan",
-        "stnm": "莫干山",
-        "val": 3000
-    },{
-        "stcd": "xiazhuhu",
-        "stnm": "下渚湖",
-        "val": 4000
-    },{
-        "stcd": "buxi",
-        "stnm": "补习",
-        "val": 5000
-    },{
-        "stcd": "qiyuan",
-        "stnm": "启源",
-        "val": 6000
-    },{
-        "stcd": "luoshe",
-        "stnm": "洛舍",
-        "val": 7000
-    },{
-        "stcd": "leidian",
-        "stnm": "雷甸",
-        "val": 8000
-    },{
-        "stcd": "zhongguan",
-        "stnm": "钟管",
-        "val": 9000
-    },{
-        "stcd": "xinan",
-        "stnm": "新安",
-        "val": 10000
-    },{
-        "stcd": "xinshi",
-        "stnm": "新市",
-        "val": 11000
-    }
-]
+﻿{
+    "data": [
+        {
+            "area_code": "330521116",
+            "area_name": "其他市县",
+            "val": "146.2"
+        },
+        {
+            "area_code": "330521101",
+            "area_name": "乾元镇",
+            "val": "108.7"
+        },
+        {
+            "area_code": "330521004",
+            "area_name": "下渚湖街道",
+            "val": "137.1"
+        },
+        {
+            "area_code": "330521003",
+            "area_name": "阜溪街道",
+            "val": "141.9"
+        },
+        {
+            "area_code": "330521001",
+            "area_name": "武康街道",
+            "val": "192.7"
+        },
+        {
+            "area_code": "330521115",
+            "area_name": "莫干山镇",
+            "val": "269.6"
+        },
+        {
+            "area_code": "330521103",
+            "area_name": "洛舍镇",
+            "val": "291.8"
+        },
+        {
+            "area_code": "330521002",
+            "area_name": "舞阳街道",
+            "val": "192.3"
+        },
+        {
+            "area_code": "330521102",
+            "area_name": "新市镇",
+            "val": "248.0"
+        },
+        {
+            "area_code": "330521113",
+            "area_name": "禹越镇",
+            "val": "238.0"
+        },
+        {
+            "area_code": "330521104",
+            "area_name": "钟管镇",
+            "val": "244.0"
+        }
+    ]
+}

@@ -31,6 +31,7 @@ window.onload = () => {
             select: '#054B87',
             top: '#07205b'
         },
+        divisor: 250,
         set_material: materials => {
             let info = materials.materialsInfo;
             for(let key in info) {
@@ -43,8 +44,8 @@ window.onload = () => {
             return materials;
         },
         data: {
-            materials: ['./assets/data/model/deqing08.mtl'],
-            objects: ['./assets/data/model/deqing08.obj'],
+            materials: ['./assets/data/model/deqing09.mtl'],
+            objects: ['./assets/data/model/deqing09.obj'],
             load: (object, goon) => search(object, goon)
         },
         show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
@@ -53,10 +54,8 @@ window.onload = () => {
             // 当点到边界或者柱子的时候不移动模型
             if(Object.getOwnPropertyNames(child.userData).length != 0) {
                 if (detail.children.length != 0) {
-                    /* 
-                        这里图省事就直接清空原先的children建新表了
-                        实际上该去修改innerHTML，会省很多性能
-                    */
+                    // 这里图省事就直接清空原先的children建新表了
+                    // 实际上该去修改innerHTML，会省很多性能
                     for(let i = 0; i < detail.children.length; i++) {
                         detail.removeChild(detail.children[i]);
                     }
@@ -71,8 +70,8 @@ window.onload = () => {
             return false;
         },
         controls: { // 轨道控制参数
-            maxPolarAngle: Math.PI * 0.75,
-            minPolarAngle: Math.PI * 0.25,
+            // maxPolarAngle: Math.PI * 0.75,
+            // minPolarAngle: Math.PI * 0.25,
             maxDistance: 200,
             minDistance: 65,
             maxAzimuthAngle: 0, // 不能右旋
@@ -85,7 +84,7 @@ window.onload = () => {
  * 遍历所有模型对象时的回调 
  * @param {*} child 当前遍历模型
  */
-const child_mapping = child => {
+function child_mapping(child) {
     if(child instanceof THREE.Mesh || child instanceof THREE.Line) {
         let name = child.name.split('_');
         let last_name = name[name.length - 1];
@@ -100,7 +99,7 @@ const child_mapping = child => {
 
         // 改变模型贴图
         switch(last_name) {
-            case 'Line': // 内部乡镇边界贴图
+            case 'line': // 内部乡镇边界贴图
                 child.material.color.set(texture.line);
             break;
 
@@ -119,7 +118,7 @@ const child_mapping = child => {
             break;
 
             case 'bottom': // 底面
-
+                child.material.color.set(texture.top);
             break;
 
             case 'area': // 柱子下的圆
@@ -142,12 +141,14 @@ function search(object, goon) {
         return response.json();
     }).then(result => {
         object = object ? object : trunk.get_object();
-        for(let item of result) { // 处理业务数据和模型数据，使板块和表格数据对应
+
+        let data = { area_name: '', val: ''};
+        for(let item of result.data) { // 处理业务数据和模型数据，使板块和表格数据对应
             for(let jtem of object.children) {
-                if(item.stcd == jtem.name.split('_')[0]) {
+                if(item.area_code == jtem.name.split('_')[0]) {
                     // 这个userData很关键，
                     // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
-                    jtem.userData = item;
+                    jtem.userData = Object.assign(data, item);
                 }
             }
         }
@@ -173,15 +174,15 @@ function get_text_canvas(text, style) {
 }
 
 // 创建表格元素
-const createTable = (child, element) => {
-    let data = Object.assign({ stnm: '-', val: '-' }, child.userData);
+function createTable(child, element) {
+    let data = Object.assign({ area_name: '-', val: '-' }, child.userData);
     let table = '', decorate = '';
 
     table += 
     '<table border="0" cellspacing="0" cellpadding="0" class="detail-table">' +
         '<tr class="header"> ' + 
             '<td colspan="3"></td>' + 
-            '<td colspan="2">' + data.stnm + '</td>' +
+            '<td colspan="2">' + data.area_name + '</td>' +
         '</tr>'+
 
         '<tr>' + 

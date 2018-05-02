@@ -19,7 +19,7 @@ export default class Trunk {
         mesh_shift_time: () => Math.random() * 1000 * 5 + 1000, // 板块移动时间
         before_init: null, // 初始化前的钩子
         border_visible: true, // 边界是否显示
-        divisor: 12000, // 控制柱子高度，该数越大，柱子越矮
+        divisor: 100, // 控制柱子高度，该数越大，柱子越矮
         camera_position: 65, // 相机position中的z
         rotation_speed: 0.02, // 开场动画后的视角旋转速度
         texture: {
@@ -412,41 +412,7 @@ export default class Trunk {
     child_mapping = child => {
         let { config } = this;
 
-        if(config.child_mapping) {
-            config.child_mapping(child);
-
-            return;
-        }
-        if(child instanceof Mesh || child instanceof Line) {
-            let name = child.name.split('_');
-            let last_name = name[name.length - 1];
-
-            let texture = config.texture;
-
-            // 改变模型贴图
-            switch(last_name) {
-                case 'Line': // 内部乡镇边界贴图
-                    child.material.color.set(texture.line);
-                break;
-
-                case 'pillar': // 柱子贴图
-                    child.material.color.set(texture.pillar);
-                    // child.material.map = new TextureLoader().load('../assets/texture/crate.jpg');
-                break;
-
-                case 'bottom': // 底面贴图
-                    child.material.color.set(texture.bottom);
-                break;
-
-                case 'border': // 边缘边界贴图
-                    child.material.color.set(texture.border);
-                break;
-
-                default: // 顶面贴图
-                    child.material.color.set(texture.top);
-                break;
-            }
-        }
+        config.child_mapping && config.child_mapping(child);
     }
 
     // 计算模型移动距离
