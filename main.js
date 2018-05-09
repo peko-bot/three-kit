@@ -28,8 +28,8 @@ window.onload = () => {
         // clientWidth: 1158,
         // clientHeight: 568,
         texture: {
-            select: '#054B87',
-            top: '#07205b'
+            select: '#06dbab',
+            top: '#067acf'
         },
         divisor: 250,
         set_material: materials => {
@@ -70,8 +70,8 @@ window.onload = () => {
             return false;
         },
         controls: { // 轨道控制参数
-            // maxPolarAngle: Math.PI * 0.75,
-            // minPolarAngle: Math.PI * 0.25,
+            maxPolarAngle: Math.PI * 0.75,
+            minPolarAngle: Math.PI * 0.25,
             maxDistance: 200,
             minDistance: 65,
             maxAzimuthAngle: 0, // 不能右旋
@@ -90,9 +90,9 @@ function child_mapping(child) {
         let last_name = name[name.length - 1];
 
         let texture = {
-            line: '#055290', // 内部乡镇边界贴图
-            pillar: '#2377e8', // 柱子贴图
-            top: '#07205b', // 上表面贴图
+            line: '#1afeff', // 内部乡镇边界贴图
+            pillar: '#ca7cf4', // 柱子贴图
+            top: '#067acf', // 上表面贴图
             border: '#2a8fdf', // 边缘边界贴图
             area: '#092573', // 柱子底下的圆
         };
@@ -122,13 +122,14 @@ function child_mapping(child) {
             break;
 
             case 'area': // 柱子下的圆
-                child.material.color.set(texture.area);
+                // child.material.color.set(texture.area);
+                child.material.visible = false;
             break;
 
             default: // 顶面贴图
                 child.material.color.set(texture.top);
-                // child.material.transparent = true;
-                // child.material.opacity = 0.7;
+                child.material.transparent = true;
+                child.material.opacity = 0.6;
             break;
         }
     }
