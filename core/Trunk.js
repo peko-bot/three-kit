@@ -34,7 +34,7 @@ export default class Trunk {
             let lights = [];
 
             let ambientLight = new AmbientLight('white');
-            lights.push(ambientLight)
+            lights.push(ambientLight);
 
             return lights;
         },
@@ -522,6 +522,7 @@ export default class Trunk {
             antialias: true
         });
         this.renderer.setSize(clientWidth, clientHeight - 4);
+        this.renderer.shadowMapEnabled = true; // 启用阴影选项
 
         this.container.appendChild(this.renderer.domElement);
 
