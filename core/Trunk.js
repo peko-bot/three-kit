@@ -521,7 +521,7 @@ export default class Trunk {
             antialias: true
         });
         // this.renderer.setSize(clientWidth, clientHeight - 4);
-        this.resize();
+        this.resize(clientWidth, clientHeight - 4);
         this.renderer.shadowMap.enabled = true; // 启用阴影选项
         this.renderer.shadowMap.type = PCFSoftShadowMap;
 
