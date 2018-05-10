@@ -699,7 +699,7 @@ class OBJLoader {
 
 				}
 
-				material.shading = sourceMaterial.smooth ? THREE.SmoothShading : THREE.FlatShading;
+				material.flatShading = sourceMaterial.smooth ? THREE.SmoothShading : THREE.FlatShading;
 
 				createdMaterials.push(material);
 

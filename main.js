@@ -2,13 +2,14 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:34:46 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-28 15:27:04
+ * @Last Modified time: 2018-05-10 11:13:01
  */
 import Trunk from './core/Trunk'
 import * as THREE from 'three'
 
+let trunk = new Trunk();
+
 window.onload = () => {
-    let trunk = new Trunk();
 
     // 刷新数据和柱子
     let refresh_pillar = document.getElementById('refreshPillar');
@@ -30,45 +31,26 @@ window.onload = () => {
         light: () => {
             let lights = [];
 
-            // var pointColor = "white";
-            // var directionalLight = new THREE.DirectionalLight(pointColor);
-            // directionalLight.castShadow = true; // 启用阴影选项
-            // directionalLight.position.set(-180, -150, 200);
+            // var directionalLight = new THREE.DirectionalLight('white');
+            // directionalLight.position.set(-50, 0, 160);
             // lights.push(directionalLight);
 
-            // let ambientLight = new THREE.AmbientLight('white');
-            // ambientLight.castShadow = true;
-            // lights.push(ambientLight);
-
-            let hemisphere = new THREE.HemisphereLight(16777215, 16777215, 0.3);
+            let hemisphere = new THREE.HemisphereLight(16777215, 16777215, 0.5);
             lights.push(hemisphere);
 
-            let light = new THREE.DirectionalLight(16777215, 0.85);
-            light.position.set(-150, 25, 50);
-            light.castShadow = true;
-            lights.push(light);
+            // let ambientLight = new THREE.AmbientLight('white');
+            // lights.push(ambientLight);
 
-            let light2 = new THREE.DirectionalLight(16777215, 0.85);
-            light2.position.set(-100, 250, 50);
-            light2.castShadow = true;
-            lights.push(light2);
-
-            let spotLight = new THREE.SpotLight("white", 8, 250, 0.44, 1, 2);
-            spotLight.position.set(-60, -30, 140);
-            spotLight.angle = -Math.PI / 4;
+            let spotLight = new THREE.SpotLight('white', 8, 250, 0.44, 1, 2);
+            spotLight.position.set(-50, 0, 160);
+            // spotLight.intensity = 0.98;
+            spotLight.castShadow = true;
             lights.push(spotLight);
 
-            let spotLight2 = new THREE.SpotLight(16777215, 1);
-            spotLight2.position.set(-100, 200, 20);
-            spotLight2.angle = Math.PI / 4;
-            spotLight2.penumbra = 0.05;
-            spotLight2.decay = 1.5;
-            spotLight2.distance = 1000;
+            let spotLight2 = new THREE.SpotLight('white');
+            spotLight2.position.set(250, 100, 100);
+            spotLight2.intensity = 0.6;
             lights.push(spotLight2);
-
-            // for(let item of lights) {
-            //     item.castShadow = true;
-            // }
 
             return lights;
         },
@@ -89,8 +71,8 @@ window.onload = () => {
             return materials;
         },
         data: {
-            materials: ['./assets/data/model/deqing12.mtl'],
-            objects: ['./assets/data/model/deqing12.obj'],
+            materials: ['./assets/data/model/deqing13.mtl'],
+            objects: ['./assets/data/model/deqing13.obj'],
             load: (object, goon) => search(object, goon)
         },
         show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
@@ -151,6 +133,8 @@ window.onload = () => {
                     // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
                     // child.material.map = new THREE.CanvasTexture(get_text_canvas('测试', '#000'));
                     child.material.color.set(texture.pillar);
+                    child.material.transparent = true;
+                    child.material.opacity = 0.95;
                     child.castShadow = true; // 启用阴影选项
                 break;
 
@@ -163,7 +147,6 @@ window.onload = () => {
                 break;
 
                 case 'bottom': // 底面
-                    child.receiveShadow = true; // 启用接受阴影选项
                     child.material.color.set(texture.top);
                 break;
 
@@ -250,4 +233,9 @@ window.onload = () => {
 
         element.innerHTML += table + decorate;
     };
+}
+
+window.onresize = () => {
+    let width = document.getElementById('container').clientWidth;
+    // console.log(width)
 }

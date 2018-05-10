@@ -2,9 +2,9 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:33:50 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-04-28 16:27:19
+ * @Last Modified time: 2018-05-10 11:14:32
  */
-import { Vector2, Vector3,  AmbientLight, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture } from 'three'
+import { Vector2, Vector3,  AmbientLight, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap } from 'three'
 import MTLLoader from '../third/three/loader/MTLLoader'
 import OBJLoader from '../third/three/loader/OBJLoader'
 import OrbitControls from 'three-orbitcontrols'
@@ -33,8 +33,10 @@ export default class Trunk {
         light: () => { // x轴正方向是屏幕右边，y轴正方向是屏幕里边，z轴正方向是屏幕上边
             let lights = [];
 
-            let ambientLight = new AmbientLight('white');
-            lights.push(ambientLight);
+            // let ambientLight = new AmbientLight('white');
+            // lights.push(ambientLight);
+            
+            lights.push(new THREE.HemisphereLight(16777215, 16777215, 0.3));
 
             return lights;
         },
@@ -506,7 +508,7 @@ export default class Trunk {
     */
     _init_params = () => {
         const { config } = this;
-        const { clientWidth, clientHeight, camera_position } = config;
+        const { camera_position, clientWidth, clientHeight } = config;
 
         // 挂载画布的dom
         this.container = config.container;
@@ -522,7 +524,8 @@ export default class Trunk {
             antialias: true
         });
         this.renderer.setSize(clientWidth, clientHeight - 4);
-        this.renderer.shadowMapEnabled = true; // 启用阴影选项
+        this.renderer.shadowMap.enabled = true; // 启用阴影选项
+        this.renderer.shadowMap.type = PCFSoftShadowMap;
 
         this.container.appendChild(this.renderer.domElement);
 
