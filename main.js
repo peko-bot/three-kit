@@ -10,7 +10,14 @@ import * as THREE from 'three'
 let trunk = new Trunk();
 
 window.onload = () => {
+    load();
+}
 
+window.onresize = () => {
+    trunk.resize();
+}
+
+const load = () => {
     // 刷新数据和柱子
     let refresh_pillar = document.getElementById('refreshPillar');
     refresh_pillar.addEventListener('click', () => search(), false);
@@ -233,9 +240,4 @@ window.onload = () => {
 
         element.innerHTML += table + decorate;
     };
-}
-
-window.onresize = () => {
-    let width = document.getElementById('container').clientWidth;
-    // console.log(width)
 }
