@@ -20,8 +20,9 @@ export default class Trunk {
         before_init: null, // 初始化前的钩子
         border_visible: true, // 边界是否显示
         divisor: 100, // 控制柱子高度，该数越大，柱子越矮
-        camera_position: 65, // 相机position中的z
-        rotation_speed: 0.02, // 开场动画后的视角旋转速度
+        camera_position: { x: 0, y: 0, z: 65 }, // 相机position中的z
+        after_rotation: -Math.PI / 4, // 开场动画后视角旋转角度
+        rotation_speed: 0.02, // 开场动画后视角旋转速度
         texture: {
             line: '#055290', // 内部乡镇边界贴图
             pillar: '#2377e8', // 柱子贴图
@@ -80,6 +81,9 @@ export default class Trunk {
         let { _startPositions } = this;
 
         let p = _startPositions[area];
+
+        this.config.before_animate && this.config.before_animate(child);
+
         if(!p) {
             p = {
                 x: Math.random() * 1000 - 500,
@@ -248,7 +252,7 @@ export default class Trunk {
             if(uuid === child.uuid) {
                 return;
             } else {
-                if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name) && !/area$/.test(child.name)) {
+                if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)) {
                     if(!uuid) { // 第一次
                         this._current = child;
                         
@@ -369,7 +373,7 @@ export default class Trunk {
             
             至于为什么不改变模型的z...因为还有个轨道控制。如果改变了y，但模型仍旧是照着x轴旋转的，
             这就会造成模型转出屏幕的问题*/
-            this._tweenInOut(camera.position, { z: config.camera_position }, 1000);
+            this._tweenInOut(camera.position, config.camera_position, 1000);
             this._tweenInOut(object.position, point, 1000);
         }
     };
@@ -506,6 +510,7 @@ export default class Trunk {
     _init_params = () => {
         const { config } = this;
         const { camera_position, clientWidth, clientHeight } = config;
+        const { x, y, z } = camera_position;
 
         // 挂载画布的dom
         this.container = config.container;
@@ -513,7 +518,7 @@ export default class Trunk {
         // 相机视锥体的长宽比
         const _camera_aspect = clientWidth / clientHeight;
         this.camera = new PerspectiveCamera(45, _camera_aspect, 1, 10000);
-        this.camera.position.z = camera_position;
+        this.camera.position.set(x, y, z);
         
         // 设置画布透明
         this.renderer = new WebGLRenderer({
@@ -552,11 +557,14 @@ export default class Trunk {
      * 这是旋转mesh
      */
     _afterMovementMesh = () => {
+        const { after_rotation } = this.config;
+
         const rotateAnimate = () => {
             requestAnimationFrame(rotateAnimate);
             
             // 沿x轴旋转
-            this.root.rotation.x >= -Math.PI / 4 ? this.root.rotation.x -= this.config.rotation_speed : null;
+            this.root.rotation.x >= after_rotation ? this.root.rotation.x -= this.config.rotation_speed : null;
+
             this.renderer.render(this.scene, this.camera);
         };
 
@@ -591,6 +599,8 @@ export default class Trunk {
             // 开始动画
             this._tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, () => {
                 _startTweenCount--;
+                
+                this.config.before_animate && this.config.before_animate(child, true);
                 if(_startTweenCount === 0) {
                     this.render_pillar(object);
                     this._afterMovementMesh();
@@ -666,6 +676,7 @@ export default class Trunk {
             objLoader.setMaterials(materials);
 
             this._load_objects(config.data.objects, objLoader, null, object => {
+                // 请求业务数据
                 config.data.load(object, new_object => {
                     this.dataObject = new_object;
 

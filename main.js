@@ -35,6 +35,15 @@ const load = () => {
         child_mapping: child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
         // clientWidth: 1158,
         // clientHeight: 568,
+        camera_position: { z: 55 },
+        after_rotation: -Math.PI / 3,
+        before_animate: (child, visible) => { // 用于控制开场动画中的边界
+            const { name } = child;
+
+            if(name == 'line' || name.includes('border') || name.includes('pillar')) {
+                child.visible = !!visible;
+            }
+        },
         light: () => {
             let lights = [];
 
@@ -104,10 +113,10 @@ const load = () => {
             return false;
         },
         controls: { // 轨道控制参数
-            maxPolarAngle: Math.PI * 0.75,
-            minPolarAngle: Math.PI * 0.25,
+            maxPolarAngle: Math.PI / 3 * 2,
+            minPolarAngle: Math.PI / 6,
             maxDistance: 200,
-            minDistance: 65,
+            minDistance: 55,
             maxAzimuthAngle: 0, // 不能右旋
             minAzimuthAngle: 0 // 不能左旋
         }
@@ -133,6 +142,7 @@ const load = () => {
             // 改变模型贴图
             switch(last_name) {
                 case 'line': // 内部乡镇边界贴图
+                    child.material.visible = true;
                     child.material.color.set(texture.line);
                 break;
 
@@ -146,6 +156,7 @@ const load = () => {
                 break;
 
                 case 'border': // 边缘边界贴图
+                    child.material.visible = true;
                     child.material.color.set(texture.border);
                 break;
 
@@ -154,12 +165,8 @@ const load = () => {
                 break;
 
                 case 'bottom': // 底面
+                    child.material.visible = true;
                     child.material.color.set(texture.top);
-                break;
-
-                case 'area': // 柱子下的圆
-                    // child.material.color.set(texture.area);
-                    child.material.visible = false;
                 break;
 
                 default: // 顶面贴图
@@ -182,7 +189,15 @@ const load = () => {
 
             for(let item of result.data) { // 处理业务数据和模型数据，使板块和表格数据对应
                 for(let jtem of object.children) {
-                    if(item.area_code == jtem.name.split('_')[0]) {
+                    const { name } = jtem;
+
+                    // if(name == 'texture' || name == 'line' || name == 'top' || name == 'bottom') {
+                    //     console.log(jtem)
+                    //     jtem.material.visible = false;
+                    // }
+                    // !/border$/.test(area) && !/line$/.test(area) && !/pillar$/.test(area)
+
+                    if(item.area_code == name.split('_')[0]) {
                         // 这个userData很关键，
                         // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
                         jtem.userData = Object.assign({ area_name: '', val: '', area_code: '' }, item);
