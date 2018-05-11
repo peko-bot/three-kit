@@ -148,7 +148,10 @@ const load = () => {
 
                 case 'pillar': // 柱子贴图
                     // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
-                    // child.material.map = new THREE.CanvasTexture(get_text_canvas('测试', '#000'));
+
+                    // 贴canvas
+                    child.material.map = new THREE.CanvasTexture(get_text_canvas('测试'));
+
                     child.material.color.set(texture.pillar);
                     child.material.transparent = true;
                     child.material.opacity = 0.95;
@@ -191,12 +194,6 @@ const load = () => {
                 for(let jtem of object.children) {
                     const { name } = jtem;
 
-                    // if(name == 'texture' || name == 'line' || name == 'top' || name == 'bottom') {
-                    //     console.log(jtem)
-                    //     jtem.material.visible = false;
-                    // }
-                    // !/border$/.test(area) && !/line$/.test(area) && !/pillar$/.test(area)
-
                     if(item.area_code == name.split('_')[0]) {
                         // 这个userData很关键，
                         // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
@@ -209,18 +206,23 @@ const load = () => {
     }
 
     // 创建柱子贴图
-    function get_text_canvas(text, style) {
+    function get_text_canvas(text) {
         let canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 300;
+        canvas.width = 256;
+        canvas.height = 256;
 
-        let context = canvas.getContext( '2d' );
-        context.beginPath();
-        context.font='50px Microsoft YaHei';
-        context.fillStyle = style;
-        context.fillText(text, 0, 50);
-        context.fill();
-        context.stroke();
+        let ctx = canvas.getContext('2d');
+        ctx.font = '50pt Arial';
+        // 使背景透明
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 文字颜色
+        ctx.fillStyle = 'black';
+        // 水平居中
+        ctx.textAlign = 'center';
+        // 垂直居中
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
         return canvas;
     }

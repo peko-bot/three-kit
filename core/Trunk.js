@@ -252,7 +252,7 @@ export default class Trunk {
             if(uuid === child.uuid) {
                 return;
             } else {
-                if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name)) {
+                if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name) && !/texture$/.test(child.name)) {
                     if(!uuid) { // 第一次
                         this._current = child;
                         
@@ -600,10 +600,14 @@ export default class Trunk {
             this._tweenInOut(child.position, { x: 0, y: 0, z: 0 }, time, () => {
                 _startTweenCount--;
                 
-                this.config.before_animate && this.config.before_animate(child, true);
                 if(_startTweenCount === 0) {
                     this.render_pillar(object);
                     this._afterMovementMesh();
+
+                    // TODO 这里不该循环，应急
+                    for(let child of object.children) {
+                        this.config.before_animate && this.config.before_animate(child, true);
+                    }
 
                     // 绑定事件，比如鼠标移到板块上高亮
                     this._initListener(object);

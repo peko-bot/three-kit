@@ -70,7 +70,7 @@
 | data | 加载模型及业务数据，具体参数见下 | {} | 无 |
 | clientWidth | 画布宽度 | Number | document.body.clientWidth |
 | clientHeight | 画布高度 | Number | document.body.clientHeight |
-| camera_position | 相机初始位置，设置z就够了，camera.position.z | Number | 65 |
+| camera_position | 相机初始位置 | {} | { x: 0, y: 0, z: 65 } |
 | rotation_speed | 开场动画结束后，视角旋转的速度 | Float | 0.02 |
 * 关于画布，默认是透明的，也就是白的。要改变背景颜色，一种是给clear_color和clear_opacity赋值，另一种是修改容器的background
 
