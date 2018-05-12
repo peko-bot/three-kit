@@ -2,20 +2,21 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 15:34:46 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-10 11:13:01
+ * @Last Modified time: 2018-05-12 11:18:46
  */
-import Trunk from './core/Trunk'
-import * as THREE from 'three'
+//  /* jshint esversion: 6 */ 
+import Trunk from './core/Trunk';
+import * as THREE from 'three';
 
-let trunk = new Trunk();
+const trunk = new Trunk();
 
 window.onload = () => {
     load();
-}
+};
 
 window.onresize = () => {
     trunk.resize();
-}
+};
 
 const load = () => {
     // 刷新数据和柱子
@@ -40,7 +41,7 @@ const load = () => {
         before_animate: (child, visible) => { // 用于控制开场动画中的边界
             const { name } = child;
 
-            if(name == 'line' || name.includes('border') || name.includes('pillar')) {
+            if(name === 'line' || name.includes('border') || name.includes('pillar')) {
                 child.visible = !!visible;
             }
         },
@@ -81,7 +82,7 @@ const load = () => {
                 let value = info[key];
 
                 // 初始化等值面
-                key == 'texture' && (value.map_d = value.map_ka = value.map_kd = './assets/data/images/20180413180000_20180416180000.png');
+                key === 'texture' && (value.map_d = value.map_ka = value.map_kd = './assets/data/images/20180413180000_20180416180000.png');
             }
 
             return materials;
@@ -95,8 +96,8 @@ const load = () => {
             let detail = document.getElementById('detail');
 
             // 当点到边界或者柱子的时候不移动模型
-            if(Object.getOwnPropertyNames(child.userData).length != 0) {
-                if (detail.children.length != 0) {
+            if(Object.getOwnPropertyNames(child.userData).length !== 0) {
+                if (detail.children.length !== 0) {
                     // 这里图省事就直接清空原先的children建新表了
                     // 实际上该去修改innerHTML，会省很多性能
                     for(let i = 0; i < detail.children.length; i++) {
@@ -194,7 +195,7 @@ const load = () => {
                 for(let jtem of object.children) {
                     const { name } = jtem;
 
-                    if(item.area_code == name.split('_')[0]) {
+                    if(item.area_code === name.split('_')[0]) {
                         // 这个userData很关键，
                         // 点击板块时直接读取模型对象中userData的数据生成表格（如果需要），默认为空
                         jtem.userData = Object.assign({ area_name: '', val: '', area_code: '' }, item);
@@ -253,8 +254,8 @@ const load = () => {
             '</tr>' +
         '</table>';
 
-        decorate += '<div class="decorate"></div>'
+        decorate += '<div class="decorate"></div>';
 
         element.innerHTML += table + decorate;
-    };
-}
+    }
+};
