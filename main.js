@@ -1,10 +1,9 @@
 /*
- * @Author: zy9@github.com/zy410419243 
- * @Date: 2018-04-24 15:34:46 
+ * @Author: zy9@github.com/zy410419243
+ * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-12 11:18:46
+ * @Last Modified time: 2018-05-12 11:44:04
  */
-//  /* jshint esversion: 6 */ 
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
 

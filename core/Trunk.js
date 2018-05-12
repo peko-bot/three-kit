@@ -1,15 +1,15 @@
 /*
- * @Author: zy9@github.com/zy410419243 
- * @Date: 2018-04-24 15:33:50 
+ * @Author: zy9@github.com/zy410419243
+ * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-10 11:14:32
+ * @Last Modified time: 2018-05-12 11:42:40
  */
-import { Vector2, Vector3, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap, HemisphereLight } from 'three'
-import MTLLoader from '../third/three/loader/MTLLoader'
-import OBJLoader from '../third/three/loader/OBJLoader'
-import OrbitControls from 'three-orbitcontrols'
-import TWEEN from 'tween'
-import extend from '../util/DeepClone'
+import { Vector2, Vector3, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap, HemisphereLight } from 'three';
+import MTLLoader from '../third/three/loader/MTLLoader';
+import OBJLoader from '../third/three/loader/OBJLoader';
+import OrbitControls from 'three-orbitcontrols';
+import TWEEN from 'tween';
+import extend from '../util/DeepClone';
 
 export default class Trunk {
     // 默认配置
