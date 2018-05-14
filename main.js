@@ -2,10 +2,11 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-12 11:44:04
+ * @Last Modified time: 2018-05-14 17:26:20
  */
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
+import extend from './util/DeepClone'
 
 const trunk = new Trunk();
 
@@ -40,7 +41,7 @@ const load = () => {
         before_animate: (child, visible) => { // 用于控制开场动画中的边界
             const { name } = child;
 
-            if(name === 'line' || name.includes('border') || name.includes('pillar')) {
+            if(name === 'line' || name.includes('border') || name.includes('pillar') || name.includes('bottom')) {
                 child.visible = !!visible;
             }
         },
@@ -150,12 +151,29 @@ const load = () => {
                     // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
 
                     // 贴canvas
-                    child.material.map = new THREE.CanvasTexture(get_text_canvas('测试'));
+                    // child.material.map = new THREE.CanvasTexture(get_text_canvas('测试'));
+
+                    // child.material.color.set(texture.pillar);
+                    // child.material.transparent = true;
+                    // child.material.opacity = 0.95;
+                    // child.castShadow = true; // 启用阴影选项
 
                     child.material.color.set(texture.pillar);
-                    child.material.transparent = true;
-                    child.material.opacity = 0.95;
-                    child.castShadow = true; // 启用阴影选项
+                    
+                    // let materials = [];
+                    // for(let i = 0; i < 6; i++) {
+                    //     let item = null;
+                    //     let map = new THREE.CanvasTexture(get_text_canvas('测试'));
+                    //     if(i == 1) {
+                    //         item = new THREE.MeshPhongMaterial({ map });
+                    //     } else {
+                    //         item = new THREE.MeshPhongMaterial();
+                    //     }
+                    //     item.color.set(texture.pillar);
+
+                    //     materials.push(item);
+                    // }
+                    // child.material = materials;
                 break;
 
                 case 'border': // 边缘边界贴图
