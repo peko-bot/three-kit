@@ -2,12 +2,10 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-15 10:39:18
+ * @Last Modified time: 2018-05-15 14:30:47
  */
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
-import extend from './util/DeepClone'
-import { generate } from 'rxjs/observable/generate';
 
 const trunk = new Trunk();
 
@@ -42,7 +40,7 @@ const load = () => {
         before_animate: (child, visible) => { // 用于控制开场动画中的边界
             const { name } = child;
 
-            if(name === 'line' || name.includes('border') || name.includes('pillar') || name.includes('bottom')) {
+            if(name === 'line' || name.includes('border') || name.includes('pillar') || name.includes('bottom') || name.includes('river')) {
                 child.visible = !!visible;
             }
         },
@@ -89,8 +87,8 @@ const load = () => {
             return materials;
         },
         data: {
-            materials: ['./assets/data/model/deqing13.mtl'],
-            objects: ['./assets/data/model/deqing13.obj'],
+            materials: ['./assets/data/model/deqing16.mtl'],
+            objects: ['./assets/data/model/deqing16.obj'],
             load: (object, goon) => search(object, goon)
         },
         show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
@@ -139,6 +137,7 @@ const load = () => {
                 top: '#067acf', // 上表面贴图
                 border: '#59ffff', // 边缘边界贴图
                 area: '#092573', // 柱子底下的圆
+                river: '#F96', // 水系
             };
 
             // 改变模型贴图
@@ -158,7 +157,6 @@ const load = () => {
                     let canvas = get_text_canvas(val, uuid);
                     let map = new THREE.CanvasTexture(canvas);
                     child.material.map = map;
-                    console.log(map)
 
                     edit_uv(child.geometry);
 
@@ -180,6 +178,10 @@ const load = () => {
                 case 'bottom': // 底面
                     child.material.visible = true;
                     child.material.color.set(texture.top);
+                break;
+
+                case 'river': // 水系
+                    // child.material.color.set(texture.river);
                 break;
 
                 default: // 顶面贴图

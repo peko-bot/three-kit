@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-12 11:42:40
+ * @Last Modified time: 2018-05-15 14:15:26
  */
 import { Vector2, Vector3, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap, HemisphereLight } from 'three';
 import MTLLoader from '../third/three/loader/MTLLoader';
@@ -252,7 +252,7 @@ export default class Trunk {
             if(uuid === child.uuid) {
                 return;
             } else {
-                if(!/border$/.test(child.name) && !/line$/.test(child.name) && !/pillar$/.test(child.name) && !/texture$/.test(child.name)) {
+                if(!child.name.includes('border') && !child.name.includes('line') && !child.name.includes('pillar') && !child.name.includes('texture') && !child.name.includes('river')) {
                     if(!uuid) { // 第一次
                         this._current = child;
                         
@@ -567,7 +567,6 @@ export default class Trunk {
 
             this.renderer.render(this.scene, this.camera);
         };
-
         rotateAnimate();
     }
 
@@ -647,6 +646,16 @@ export default class Trunk {
         this.render_pillar(dataObject);
     }
 
+    _flush = () => {
+        // 实时渲染
+        const render = () => {
+            requestAnimationFrame(render);
+            TWEEN.update();
+            this.renderer.render(this.scene, this.camera);
+        }
+        render();
+    }
+
     // 渲染柱子
     render_pillar = object => {
         const { config } = this;
@@ -689,13 +698,7 @@ export default class Trunk {
                     this.root = new Object3D().add(new_object);
                     this.scene.add(this.root);
                     
-                    // 实时渲染
-                    const render = () => {
-                        requestAnimationFrame(render);
-                        TWEEN.update();
-                        this.renderer.render(this.scene, this.camera);
-                    }
-                    render();
+                    this._flush();
                 });
             })
         });
