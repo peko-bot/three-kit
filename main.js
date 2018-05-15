@@ -2,11 +2,12 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-14 17:26:20
+ * @Last Modified time: 2018-05-15 10:39:18
  */
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
 import extend from './util/DeepClone'
+import { generate } from 'rxjs/observable/generate';
 
 const trunk = new Trunk();
 
@@ -48,7 +49,7 @@ const load = () => {
         light: () => {
             let lights = [];
 
-            // var directionalLight = new THREE.DirectionalLight('white');
+            // let directionalLight = new THREE.DirectionalLight('white');
             // directionalLight.position.set(-50, 0, 160);
             // lights.push(directionalLight);
 
@@ -114,12 +115,12 @@ const load = () => {
             return false;
         },
         controls: { // 轨道控制参数
-            maxPolarAngle: Math.PI / 3 * 2,
-            minPolarAngle: Math.PI / 6,
-            maxDistance: 200,
-            minDistance: 55,
-            maxAzimuthAngle: 0, // 不能右旋
-            minAzimuthAngle: 0 // 不能左旋
+            // maxPolarAngle: Math.PI / 3 * 2,
+            // minPolarAngle: Math.PI / 6,
+            // maxDistance: 200,
+            // minDistance: 55,
+            // maxAzimuthAngle: 0, // 不能右旋
+            // minAzimuthAngle: 0 // 不能左旋
         }
     });
 
@@ -149,31 +150,22 @@ const load = () => {
 
                 case 'pillar': // 柱子贴图
                     // child.material.map = new THREE.TextureLoader().load('./assets/texture/crate.jpg');
+                    // child.material.map = new THREE.TextureLoader().load('./assets/texture/texture-atlas.jpg');
+                    const { uuid, userData } = child;
+                    const { val = '暂无' } = userData;
 
                     // 贴canvas
-                    // child.material.map = new THREE.CanvasTexture(get_text_canvas('测试'));
+                    let canvas = get_text_canvas(val, uuid);
+                    let map = new THREE.CanvasTexture(canvas);
+                    child.material.map = map;
+                    console.log(map)
 
-                    // child.material.color.set(texture.pillar);
-                    // child.material.transparent = true;
-                    // child.material.opacity = 0.95;
-                    // child.castShadow = true; // 启用阴影选项
+                    edit_uv(child.geometry);
 
                     child.material.color.set(texture.pillar);
-                    
-                    // let materials = [];
-                    // for(let i = 0; i < 6; i++) {
-                    //     let item = null;
-                    //     let map = new THREE.CanvasTexture(get_text_canvas('测试'));
-                    //     if(i == 1) {
-                    //         item = new THREE.MeshPhongMaterial({ map });
-                    //     } else {
-                    //         item = new THREE.MeshPhongMaterial();
-                    //     }
-                    //     item.color.set(texture.pillar);
-
-                    //     materials.push(item);
-                    // }
-                    // child.material = materials;
+                    child.material.transparent = true;
+                    child.material.opacity = 0.95;
+                    child.castShadow = true; // 启用阴影选项
                 break;
 
                 case 'border': // 边缘边界贴图
@@ -200,6 +192,35 @@ const load = () => {
         }
     }
 
+    // 修改uv规则
+    function edit_uv(geometry) {
+        let bricks = [new THREE.Vector2(0, .666), new THREE.Vector2(.5, .666), new THREE.Vector2(.5, 1), new THREE.Vector2(0, 1)];
+        let clouds = [new THREE.Vector2(.5, .666), new THREE.Vector2(1, .666), new THREE.Vector2(1, 1), new THREE.Vector2(.5, 1)];
+        let crate = [new THREE.Vector2(0, .333), new THREE.Vector2(.5, .333), new THREE.Vector2(.5, .666), new THREE.Vector2(0, .666)];
+        let stone = [new THREE.Vector2(.5, .333), new THREE.Vector2(1, .333), new THREE.Vector2(1, .666), new THREE.Vector2(.5, .666)];
+        let water = [new THREE.Vector2(0, 0), new THREE.Vector2(.5, 0), new THREE.Vector2(.5, .333), new THREE.Vector2(0, .333)];
+        let wood = [new THREE.Vector2(.5, 0), new THREE.Vector2(1, 0), new THREE.Vector2(1, .333), new THREE.Vector2(.5, .333)];
+
+        geometry.faceVertexUvs[0] = [];
+        geometry.faceVertexUvs[0][2] = [ bricks[0], bricks[1], bricks[3] ];
+        geometry.faceVertexUvs[0][3] = [ bricks[1], bricks[2], bricks[3] ];
+        
+        geometry.faceVertexUvs[0][0] = [ clouds[0], clouds[1], clouds[3] ];
+        geometry.faceVertexUvs[0][1] = [ clouds[1], clouds[2], clouds[3] ];
+        
+        geometry.faceVertexUvs[0][4] = [ crate[0], crate[1], crate[3] ];
+        geometry.faceVertexUvs[0][5] = [ crate[1], crate[2], crate[3] ];
+        
+        geometry.faceVertexUvs[0][6] = [ stone[0], stone[1], stone[3] ];
+        geometry.faceVertexUvs[0][7] = [ stone[1], stone[2], stone[3] ];
+        
+        geometry.faceVertexUvs[0][8] = [ water[0], water[1], water[3] ];
+        geometry.faceVertexUvs[0][9] = [ water[1], water[2], water[3] ];
+        
+        geometry.faceVertexUvs[0][10] = [ wood[0], wood[1], wood[3] ];
+        geometry.faceVertexUvs[0][11] = [ wood[1], wood[2], wood[3] ];
+    }
+
     // 请求新数据并刷新柱子
     function search(object, goon) {
         // 请求业务数据，自行拼接参数。当然不用fetch也行，反正最终给goon传入新的模型对象就行了
@@ -224,13 +245,15 @@ const load = () => {
     }
 
     // 创建柱子贴图
-    function get_text_canvas(text) {
+    function get_text_canvas(text, uuid) {
         let canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 256;
+        canvas.width = 128;
+        canvas.height = 128;
+        canvas.id = `texture_${uuid}`;
 
         let ctx = canvas.getContext('2d');
-        ctx.font = '50pt Arial';
+
+        ctx.font = '16pt Arial';
         // 使背景透明
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -240,7 +263,7 @@ const load = () => {
         ctx.textAlign = 'center';
         // 垂直居中
         ctx.textBaseline = 'middle';
-        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+        ctx.fillText(text, canvas.width / 4, canvas.height / 6);
 
         return canvas;
     }
