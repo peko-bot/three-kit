@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-15 14:15:26
+ * @Last Modified time: 2018-05-17 11:16:40
  */
 import { Vector2, Vector3, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap, HemisphereLight } from 'three';
 import MTLLoader from '../third/three/loader/MTLLoader';
@@ -48,17 +48,21 @@ export default class Trunk {
 
     _startPositions = {};
     _startTweenCount = 0;
+
     // 柱子高度变化的定时器
     _intervals = {};
+
     // 鼠标移入板块高亮
     _old = {};
     _current = {};
+
     /* 
         渲染模型容器,相当于对div进行appendChild
         这里具体干的是往scene里加Object3D，然后所有模型都放在Object3D对象里
         原因是scene上不能直接渲染Mesh啊Group之类的对象，需要这么个载体
     */
     root = {};
+
     // 标识模型是否移动过
     _withdrawPosition = false;
     
@@ -75,6 +79,9 @@ export default class Trunk {
     camera = null;
     renderer = null;
     scene = null;
+
+    // 轨道控制
+    controls = null;
 
     // 初始化开场动画前板块位置
     _initAreaPosition = (area, child) => {
@@ -360,12 +367,13 @@ export default class Trunk {
                     y: renderer.domElement.offsetHeight / 2
                 }, camera, renderer.domElement);
 
-                // 避免飞出
+                // 避免飞出画布
                 this._withdrawPosition.x += getMeshWidth(object).length / 4;
+                
+                this._tweenInOut(camera.position, { z: 80 }, 1000);
             }
             point = this._withdrawPosition;
 
-            this._tweenInOut(camera.position, { z: 100 }, 1000);
             this._tweenInOut(object.position, point, 1000);
         } else {
             /* 在开场动画结束后，模型需要填满整个页面，但点击板块显示详情时会出现空间不够的情况
@@ -375,8 +383,10 @@ export default class Trunk {
             这就会造成模型转出屏幕的问题*/
             this._tweenInOut(camera.position, config.camera_position, 1000);
             this._tweenInOut(object.position, point, 1000);
+
+            this._withdrawPosition = null;
         }
-    };
+    }
     
     // 获得模型宽度
     getMeshWidth = object => {
@@ -538,6 +548,7 @@ export default class Trunk {
         // 初始化轨道控制
         let controls = new OrbitControls(this.camera, this.renderer.domElement);
         Object.assign(controls, config.controls);
+        this.controls = controls;
 
         // 初始化光线
         if(config.light) {
@@ -650,7 +661,10 @@ export default class Trunk {
         // 实时渲染
         const render = () => {
             requestAnimationFrame(render);
+
             TWEEN.update();
+            this.controls.update();
+
             this.renderer.render(this.scene, this.camera);
         }
         render();

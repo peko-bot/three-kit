@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-15 14:30:47
+ * @Last Modified time: 2018-05-17 09:19:35
  */
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
@@ -113,12 +113,12 @@ const load = () => {
             return false;
         },
         controls: { // 轨道控制参数
-            // maxPolarAngle: Math.PI / 3 * 2,
-            // minPolarAngle: Math.PI / 6,
-            // maxDistance: 200,
-            // minDistance: 55,
-            // maxAzimuthAngle: 0, // 不能右旋
-            // minAzimuthAngle: 0 // 不能左旋
+            maxPolarAngle: Math.PI / 3 * 2,
+            minPolarAngle: Math.PI / 6,
+            maxDistance: 200,
+            minDistance: 55,
+            maxAzimuthAngle: 0, // 不能右旋
+            minAzimuthAngle: 0 // 不能左旋
         }
     });
 
@@ -275,28 +275,29 @@ const load = () => {
         let data = Object.assign({ area_name: '', val: '', area_core: '' }, child.userData);
         let table = '', decorate = '';
 
-        table += 
-        '<table border="0" cellspacing="0" cellpadding="0" class="detail-table">' +
-            '<tr class="header"> ' + 
-                '<td colspan="3"></td>' + 
-                '<td colspan="2">' + data.area_name + '</td>' +
-            '</tr>'+
+        table = `
+            <table border="0" cellspacing="0" cellpadding="0" class="detail-table">
+                <tr class="header">
+                    <td colspan="3"></td>
+                    <td colspan="2">${data.area_name}</td>
+                </tr>
 
-            '<tr>' + 
-                '<td colspan="5"></td>' + 
-            '</tr>' + 
+                <tr>
+                    <td colspan="5"></td>
+                </tr>
 
-            '<tr>' + 
-                '<td class="title" colspan="3">' + '水位' + '</td>' +
-                '<td class="value" colspan="2">' + data.val + '</td>' +
-            '</tr>' +
+                <tr>
+                    <td class="title" colspan="3">水位</td>
+                    <td class="value" colspan="2">${data.val}</td>
+                </tr>
 
-            '<tr>' + 
-                '<td colspan="5"></td>' + 
-            '</tr>' +
-        '</table>';
+                <tr>
+                    <td colspan="5"></td>
+                </tr>
+            </table>
+        `;
 
-        decorate += '<div class="decorate"></div>';
+        decorate = `<div class="decorate"></div>`;
 
         element.innerHTML += table + decorate;
     }
