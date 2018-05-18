@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-17 11:16:40
+ * @Last Modified time: 2018-05-17 14:00:18
  */
 import { Vector2, Vector3, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap, HemisphereLight } from 'three';
 import MTLLoader from '../third/three/loader/MTLLoader';
@@ -181,7 +181,7 @@ export default class Trunk {
             }
         }
 
-        sh = setInterval(show, function() {});
+        sh = setInterval(show, () => {});
         this._intervals[sh] = sh;
     };
     
