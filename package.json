@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "build": "webpack -p"
+    "build": "webpack -p --mode production"
   },
   "license": "MIT",
   "dependencies": {

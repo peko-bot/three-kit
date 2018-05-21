@@ -1,3 +1,9 @@
+/*
+ * @Author: zy9@github.com/zy410419243 
+ * @Date: 2018-04-24 14:12:30 
+ * @Last Modified by: zy9
+ * @Last Modified time: 2018-05-21 15:19:57
+ */
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const fs = require('fs');
@@ -6,19 +12,36 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 const buildPath = './dist/';
+const dev = process.argv.includes('development') ? true : false;
 
 module.exports = {
   devServer: {
     port: 9099
   },
-  devtool: 'source-map',
+  devtool: dev ? 'source-map' : '',
   entry: {
     Trunk: './main.js'
   },
   output: {
     path: __dirname + '/dist',
-    filename: 'Trunk.[chunkHash:8].js'
+    filename: dev ? 'Trunk.[chunkHash:8].js' : 'Trunk.js'
   },
+  // optimization: { // 分离插件代码
+  //   splitChunks: {
+  //     chunks: 'all',
+  //     cacheGroups: {
+  //       vendor: {
+  //         test: /node_modules\//,
+  //         name: 'dist/vendor',
+  //         priority: 10,
+  //         enforce: true
+  //       }
+  //     }
+  //   },
+  //   runtimeChunk: {
+  //     name: 'dist/manifest'
+  //   }
+  // },
   plugins: [
     new HtmlWebpackPlugin({ // 生成html
       template: 'index.html'
@@ -26,10 +49,10 @@ module.exports = {
     new WebpackOnBuildPlugin(stats => { // 删除dist下原有文件
       const newlyCreatedAssets = stats.compilation.assets;
 
-      fs.readdir(path.resolve(buildPath), (err, files) => {
+      !dev && fs.readdir(path.resolve(buildPath), (err, files) => {
         files && files.forEach(file => {
           if (!newlyCreatedAssets[file]) {
-            fs.unlink(path.resolve(buildPath + file), () => {});
+            fs.unlink(path.resolve(buildPath + file), () => { });
           }
         });
       })
@@ -39,7 +62,7 @@ module.exports = {
         from: __dirname + '/assets',
         to: __dirname + '/dist/assets'
       }
-    ])
+    ]),
   ],
   module: {
     rules: [
