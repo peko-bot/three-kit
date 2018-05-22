@@ -2,9 +2,9 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-17 14:00:18
+ * @Last Modified time: 2018-05-22 12:09:30
  */
-import { Vector2, Vector3, Mesh, Raycaster, BoxHelper, Box3, Line, PerspectiveCamera, WebGLRenderer, Scene, Group, Geometry, TextureLoader, Object3D, CanvasTexture, PCFSoftShadowMap, HemisphereLight } from 'three';
+import * as THREE from 'three';
 import MTLLoader from '../third/three/loader/MTLLoader';
 import OBJLoader from '../third/three/loader/OBJLoader';
 import OrbitControls from 'three-orbitcontrols';
@@ -112,7 +112,7 @@ export default class Trunk {
             child.visible = visible;
         }
 
-        if(child instanceof Mesh) {
+        if(child instanceof THREE.Mesh) {
             let area = child.name.split('_')[0];
             this._initAreaPosition(area, child);
         }
@@ -307,8 +307,8 @@ export default class Trunk {
 
         let vpx = (eltx / container.offsetWidth) * 2 - 1;
         let vpy = -(elty / container.offsetHeight) * 2 + 1;
-        let vector = new Vector2(vpx, vpy);
-        let raycaster = new Raycaster();
+        let vector = new THREE.Vector2(vpx, vpy);
+        let raycaster = new THREE.Raycaster();
 
         raycaster.setFromCamera(vector, this.camera);
 
@@ -391,8 +391,8 @@ export default class Trunk {
     // 获得模型宽度
     getMeshWidth = object => {
         let c = 16711680, length = 0, width = 0, height = 0;
-        let boxHelper = new BoxHelper(object, c);
-        let box = new Box3().setFromObject(object);
+        let boxHelper = new THREE.BoxHelper(object, c);
+        let box = new THREE.Box3().setFromObject(object);
 
         boxHelper.update();
 
@@ -433,17 +433,17 @@ export default class Trunk {
         d.updateMatrixWorld(true);
 
         let b = this.getVector2InScene(i, c);
-        let j = new Vector3(b.x, b.y, 0);
+        let j = new THREE.Vector3(b.x, b.y, 0);
 
         j.unproject(d);
         j.sub(d.position);
         j.normalize();
 
-        let f = new Raycaster(d.position, j);
+        let f = new THREE.Raycaster(d.position, j);
         let h = f.ray.origin;
         let g = f.ray.direction;
         let e = 0;
-        let a = new Vector3();
+        let a = new THREE.Vector3();
 
         a.setX(h.x - ((h.z - e) * g.x / g.z));
         a.setY(h.y - ((h.z - e) * g.y / g.z));
@@ -452,7 +452,7 @@ export default class Trunk {
     }
 
     getVector2InScene = (a, c) => {
-        let b = new Vector2();
+        let b = new THREE.Vector2();
         b.x = (a.x / c.offsetWidth) * 2 - 1;
         b.y = -(a.y / c.offsetHeight) * 2 + 1;
 
@@ -527,22 +527,22 @@ export default class Trunk {
 
         // 相机视锥体的长宽比
         const _camera_aspect = clientWidth / clientHeight;
-        this.camera = new PerspectiveCamera(45, _camera_aspect, 1, 10000);
+        this.camera = new THREE.PerspectiveCamera(45, _camera_aspect, 1, 10000);
         this.camera.position.set(x, y, z);
         
         // 设置画布透明
-        this.renderer = new WebGLRenderer({
+        this.renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true
         });
         // this.renderer.setSize(clientWidth, clientHeight - 4);
         this.resize(clientWidth, clientHeight - 4);
         this.renderer.shadowMap.enabled = true; // 启用阴影选项
-        this.renderer.shadowMap.type = PCFSoftShadowMap;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         this.container.appendChild(this.renderer.domElement);
 
-        this.scene = new Scene();
+        this.scene = new THREE.Scene();
         this.scene.add(this.camera);
 
         // 初始化轨道控制
@@ -589,12 +589,12 @@ export default class Trunk {
         let { config, _startTweenCount } = this;
 
         object.traverse(child => {
-            if(child instanceof Group) {
+            if(child instanceof THREE.Group) {
                 return;
             }
-            if(child instanceof Mesh) {
-                child.geometry = new Geometry().fromBufferGeometry(child.geometry);
-            } else if(child instanceof Line) {
+            if(child instanceof THREE.Mesh) {
+                child.geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
+            } else if(child instanceof THREE.Line) {
                 console.log(child.name)
             }
 
@@ -634,7 +634,7 @@ export default class Trunk {
     */
     show_texture = (material, url) => {
         if(url) {
-            new TextureLoader().load(url, map => {
+            new THREE.TextureLoader().load(url, map => {
                 this.model_texture.material.map = map;
             });
         }
@@ -709,7 +709,7 @@ export default class Trunk {
 
                     this._handle_mesh(new_object);
 
-                    this.root = new Object3D().add(new_object);
+                    this.root = new THREE.Object3D().add(new_object);
                     this.scene.add(this.root);
                     
                     this._flush();
