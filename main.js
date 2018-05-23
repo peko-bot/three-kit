@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-22 14:46:58
+ * @Last Modified time: 2018-05-23 14:45:53
  */
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
@@ -18,6 +18,7 @@ window.onresize = () => {
 };
 
 const load = () => {
+    // require.ensure([], () => {});
     // 刷新数据和柱子
     let refresh_pillar = document.getElementById('refreshPillar');
     refresh_pillar.addEventListener('click', () => search(), false);
@@ -56,14 +57,14 @@ const load = () => {
             // lights.push(ambientLight);
 
             let spotLight = new THREE.SpotLight('white', 8, 250, 0.44, 1, 2);
-            spotLight.position.set(-50, 0, 160);
-            // spotLight.intensity = 0.98;
+            spotLight.position.set(-50, 120, 160);
             spotLight.castShadow = true;
             lights.push(spotLight);
 
             let spotLight2 = new THREE.SpotLight('white');
             spotLight2.position.set(250, 100, 100);
             spotLight2.intensity = 0.6;
+            // spotLight2.castShadow = true;
             lights.push(spotLight2);
 
             return lights;

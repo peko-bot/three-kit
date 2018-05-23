@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-04-24 14:12:30 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-21 15:19:57
+ * @Last Modified time: 2018-05-22 17:39:41
  */
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -24,24 +24,10 @@ module.exports = {
   },
   output: {
     path: __dirname + '/dist',
-    filename: dev ? 'Trunk.[chunkHash:8].js' : 'Trunk.js'
+    filename: dev ? 'Trunk.[chunkHash:8].js' : 'Trunk.js',
+    // publicPath: './dist/vendor/',
+    // chunkFilename: 'vendor/[name].vendor.js',
   },
-  // optimization: { // 分离插件代码
-  //   splitChunks: {
-  //     chunks: 'all',
-  //     cacheGroups: {
-  //       vendor: {
-  //         test: /node_modules\//,
-  //         name: 'dist/vendor',
-  //         priority: 10,
-  //         enforce: true
-  //       }
-  //     }
-  //   },
-  //   runtimeChunk: {
-  //     name: 'dist/manifest'
-  //   }
-  // },
   plugins: [
     new HtmlWebpackPlugin({ // 生成html
       template: 'index.html'
