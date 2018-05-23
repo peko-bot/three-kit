@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-05-23 14:45:53
+ * @Last Modified time: 2018-05-23 15:36:33
  */
 import Trunk from './core/Trunk';
 import * as THREE from 'three';
@@ -30,7 +30,7 @@ const load = () => {
     trunk.init({
         container: document.getElementById('container'), // 画布挂载节点
         // clear_color: 0x4584b4, // 画布颜色
-        mesh_shift_time: () => 2000, // 定义各板块移动速度
+        // mesh_shift_time: () => 2000, // 定义各板块移动速度
         child_mapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
         // clientWidth: 1158,
         // clientHeight: 568,
@@ -86,8 +86,8 @@ const load = () => {
             return materials;
         },
         data: {
-            materials: ['./assets/data/model/deqing16.mtl'],
-            objects: ['./assets/data/model/deqing16.obj'],
+            materials: ['./assets/data/model/deqing17.mtl'],
+            objects: ['./assets/data/model/deqing17.obj'],
             load: (object, goon) => search(object, goon)
         },
         show_detail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
