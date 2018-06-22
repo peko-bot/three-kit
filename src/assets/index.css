@@ -1,0 +1,84 @@
+.container{
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    /* background: rgba(212, 164, 30, 0.5); */
+    background-image: url(./img/bg.jpg);
+    overflow: hidden;
+}
+
+.timeline {
+    width: 100px;
+    height: 50px;
+    background: #F96;
+    position: absolute;
+    top: 5%;
+    left: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.refresh-pillar{
+    width: 100px;
+    height: 50px;
+    background: #F96;
+    position: absolute;
+    top: 5%;
+    left: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.detail {
+    position: absolute;
+    top: 25%;
+    right: 10%;
+    color: #FFF;
+    user-select: none;
+    transform: scale(1.58);
+    transform-origin: right top 0px;
+}
+
+.detail .detail-table {
+    table-layout: fixed;
+    padding: 0px 20px;
+    z-index: 2;
+    top: 20px;
+    left: 20px;
+    width: 150px;
+    height: 100px;
+    background: linear-gradient(to left, #31ABFE, #31ABFE) left top no-repeat, linear-gradient(to bottom, #31ABFE, #31ABFE) left top no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) right top no-repeat, linear-gradient(to bottom, #31ABFE, #31ABFE) right top no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) left bottom no-repeat, linear-gradient(to bottom, #31ABFE, #31ABFE) left bottom no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) right bottom no-repeat, linear-gradient(to left, #31ABFE, #31ABFE) right bottom no-repeat;
+    background-size: 1px 20px, 20px 1px, 1px 20px, 20px 1px;
+}
+
+.detail .detail-table .decorate {
+    background-image: -webkit-linear-gradient(right, rgba(0, 89, 130, 0.5) 0%, rgba(0, 89, 130, 0.2) 20%, rgba(0, 89, 130, 0) 40%, rgba(0, 89, 130, 0) 100%);
+    top: 40px;
+    left: 0px;
+}
+
+.detail .detail-table td {
+    text-align: center;
+    padding: 5px 5px;
+    font-size: 12px;
+    width: 80px;
+    white-space: normal;
+    word-break: break-all;
+    word-wrap: break-word;
+    color: #fff;
+}
+
+.detail .detail-table .title {
+    font-size: 12px;
+    line-height: 14px;
+    width: 100px;
+    padding: 0px 0px 30px 3px;
+    color: #00a5ff;
+    text-align: left;
+}

@@ -2,29 +2,23 @@
 - Three.js的一实现封装
   
 # 用法
-* 热编译
+* 跑在webpack-dev-server上
 ``` bash
-  git clone https://github.com/zy410419243/three-kit.git
-
   npm install
 
   npm start
 
-  在地址栏输入http://localhost:9099 即可
+  在地址栏输入http://localhost:9099
 ```
 
-* 静态部署
-``` bash
-  npm run bulid
+* 静态部署  
+现已不再支持脚手架内打包
 
-  把/dist部署到服务器上运行即可
-```
-
-* 用在react里  
+* 用在react里，new一个实例对象就能用了，比如  
 (假设component和modules同级)    
-复制/core/Trunk、/assets、/util、/third到/component/three下，那么在使用时/modules/Three-demo.js
+复制/lib、/assets、/util、/third到/component/three下，那么在使用时/modules/Three-demo.js
 ``` javascript
-  import Trunk from '../component/three/core/Trunk'
+  import Trunk from '../component/three/lib'
 
   ComponentDidMount = () => {
     let trunk = new Trunk();
@@ -74,12 +68,12 @@
 | rotation_speed | 开场动画结束后，视角旋转的速度 | Float | 0.02 |
 * 关于画布，默认是透明的，也就是白的。要改变背景颜色，一种是给clear_color和clear_opacity赋值，另一种是修改容器的background
 
-## Trunk.init(config) -> config.勾子
+## Trunk.init(config) -> config.hooks
 | 参数 | 说明 | 类型 |
 | :------: | ----- | :------: |
 | before_init | 在加载模型之前、初始化参数之后的钩子，传出于默认值合并后的config | Function, (config) => {}  |
 | set_material | 加载材料后、加载模型前的钩子，用于处理等值面之类的贴图，不预先处理的话，texture.map.image的尺寸没法确定。传出合并后的材料对象 | Function, (materials) => { return materials; }  |
-| data.load | 勉强算是勾子，在加载材质和模型之后，在渲染之前，毕竟数据还没处理。本来写在类内，但想想数据处理太复杂就丢出来了。具体data中的参数 | Function, (object, goon) |
+| data.load | 勉强算是钩子，在加载材质和模型之后，在渲染之前，毕竟数据还没处理。本来写在类内，但想想数据处理太复杂就丢出来了。具体data中的参数 | Function, (object, goon) |
 | before_animate | 作用于板块初始化位置时，及开场动画结束，也就是板块移动结束时。用于控制开场动画中的边界及柱子 | Function, child => {} |
 
 ## Trunk.init(config) -> config.texture
