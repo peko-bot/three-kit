@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243 
  * @Date: 2018-05-20 13:48:08 
  * @Last Modified by: zy9
- * @Last Modified time: 2018-06-22 14:21:27
+ * @Last Modified time: 2018-07-13 10:46:10
  */
 const webpack = require('webpack');
 const webpackDevServer = require('webpack-dev-server');
@@ -23,7 +23,7 @@ const devServerOptions = {
     host: 'localhost',
     noInfo: true,
     clientLogLevel: 'error',
-    contentBase: path.join(__dirname, 'src')
+    contentBase: path.join(__dirname, 'demo')
 };
 
 const webpackConfig = {
@@ -34,7 +34,7 @@ const webpackConfig = {
         demo: [
             'webpack-dev-server/client?http://' + devServerOptions.host + ':' + devServerOptions.port,
             'webpack/hot/only-dev-server',
-            __dirname + '/src',
+            __dirname + '/demo',
         ],
         // lib: [
         //     'webpack-dev-server/client?http://' + devServerOptions.host + ':' + devServerOptions.port,

@@ -1,35 +1,35 @@
 {
   "name": "three-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "start": "node webpack.dev.js",
+    "build": "node webpack.prod.js",
     "push": "git add .&& git commit -m \"update\" && git push"
   },
   "license": "MIT",
   "dependencies": {
-    "three": "^0.92.0",
-    "three-orbitcontrols": "^2.1.2",
-    "tween": "^0.9.0"
+    "three": "latest",
+    "three-orbitcontrols": "latest",
+    "tween": "latest"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-import": "^1.7.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "chalk": "^2.4.1",
-    "clean-webpack-plugin": "^0.1.19",
-    "copy-webpack-plugin": "^4.5.1",
-    "css-loader": "^0.28.11",
-    "html-webpack-plugin": "^3.2.0",
-    "mini-css-extract-plugin": "^0.4.0",
-    "postcss-loader": "^2.1.4",
-    "style-loader": "^0.21.0",
-    "url-loader": "^1.0.1",
-    "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.7",
-    "webpack-dev-server": "^3.1.4",
+    "babel-core": "latest",
+    "babel-loader": "latest",
+    "babel-plugin-import": "latest",
+    "babel-preset-env": "latest",
+    "babel-preset-stage-0": "latest",
+    "chalk": "latest",
+    "clean-webpack-plugin": "latest",
+    "copy-webpack-plugin": "latest",
+    "css-loader": "latest",
+    "html-webpack-plugin": "latest",
+    "mini-css-extract-plugin": "latest",
+    "postcss-loader": "latest",
+    "style-loader": "latest",
+    "url-loader": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest",
+    "webpack-dev-server": "latest",
     "toho-log-plugin": "git+https://github.com/zy410419243/toho-log-plugin.git"
   }
 }

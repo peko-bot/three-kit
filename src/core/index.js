@@ -2,11 +2,11 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-06-22 14:10:18
+ * @Last Modified time: 2018-07-13 11:40:39
  */
 import * as THREE from 'three';
-import MTLLoader from '../third/three/loader/MTLLoader';
-import OBJLoader from '../third/three/loader/OBJLoader';
+import MTLLoader from '../loader/MTLLoader';
+import OBJLoader from '../loader/OBJLoader';
 import OrbitControls from 'three-orbitcontrols';
 import TWEEN from 'tween';
 import extend from '../util/DeepClone';
