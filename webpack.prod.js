@@ -1,6 +1,6 @@
 /*
- * @Author: zy9@github.com/zy410419243 
- * @Date: 2018-05-20 13:48:08 
+ * @Author: zy9@github.com/zy410419243
+ * @Date: 2018-05-20 13:48:08
  * @Last Modified by: zy9
  * @Last Modified time: 2018-07-13 11:42:39
  */
@@ -26,32 +26,32 @@ let plugins = commonPlugin;
 plugins.push(new TohoLogPlugin({ dev: false }));
 
 plugins.push(new CleanWebpackPlugin(['dist'], {
-    verbose: false
+	verbose: false
 }));
 
 const options = {
-    mode: 'production',
-    devServer: {
-        port: 9099
-    },
-    resolve: {
-        extensions: ['.js'],
-    },
-    externals: {
-        'three': 'three'
-    },
-    devtool: 'source-map',
-    entry: {
-        Trunk: __dirname + '/src',
-    },
-    output: {
-        path: __dirname + '/dist',
-        filename: '[name].js',
-        chunkFilename: 'vendor/[name].js',
-        libraryTarget: 'umd'
-    },
-    plugins,
-    module: commonModule
-}
+	mode: 'production',
+	devServer: {
+		port: 9099
+	},
+	resolve: {
+		extensions: ['.js'],
+	},
+	externals: {
+		'three': 'three'
+	},
+	devtool: 'source-map',
+	entry: {
+		Trunk: __dirname + '/src',
+	},
+	output: {
+		path: __dirname + '/dist',
+		filename: '[name].js',
+		chunkFilename: 'vendor/[name].js',
+		libraryTarget: 'umd'
+	},
+	plugins,
+	module: commonModule
+};
 
 webpack(options).run();

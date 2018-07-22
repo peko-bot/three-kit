@@ -8,7 +8,7 @@ import * as THREE from 'three';
 
 class MTLLoader {
 
-	constructor(manager) {
+	constructor (manager) {
 		this.manager = (manager !== undefined) ? manager : THREE.DefaultLoadingManager;
 
 	}
@@ -26,13 +26,14 @@ class MTLLoader {
 	 * @note In order for relative texture references to resolve correctly
 	 * you must call setPath and/or setTexturePath explicitly prior to load.
 	 */
-	load(url, onLoad, onProgress, onError) {
+	load (url, onLoad, onProgress, onError) {
 
 		var scope = this;
 
 		var loader = new THREE.FileLoader(this.manager);
+
 		loader.setPath(this.path);
-		loader.load(url, function (text) {
+		loader.load(url, (text) => {
 
 			onLoad(scope.parse(text));
 
@@ -51,7 +52,7 @@ class MTLLoader {
 	 *     mtlLoader.setPath( 'assets/obj/' );
 	 *     mtlLoader.load( 'my.mtl', ... );
 	 */
-	setPath(path) {
+	setPath (path) {
 		this.path = path;
 	}
 
@@ -68,13 +69,13 @@ class MTLLoader {
 	 *     mtlLoader.setTexturePath( 'assets/textures/' );
 	 *     mtlLoader.load( 'my.mtl', ... );
 	 */
-	setTexturePath(path) {
+	setTexturePath (path) {
 
 		this.texturePath = path;
 
 	}
 
-	setBaseUrl(path) {
+	setBaseUrl (path) {
 
 		console.warn('THREE.MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
 
@@ -82,13 +83,13 @@ class MTLLoader {
 
 	}
 
-	setCrossOrigin(value) {
+	setCrossOrigin (value) {
 
 		this.crossOrigin = value;
 
 	}
 
-	setMaterialOptions(value) {
+	setMaterialOptions (value) {
 
 		this.materialOptions = value;
 
@@ -105,16 +106,17 @@ class MTLLoader {
 	 * @note In order for relative texture references to resolve correctly
 	 * you must call setPath and/or setTexturePath explicitly prior to parse.
 	 */
-	parse(text) {
+	parse (text) {
 
 		var lines = text.split('\n');
 		var info = {};
-		var delimiter_pattern = /\s+/;
+		var delimiterPattern = /\s+/;
 		var materialsInfo = {};
 
 		for (var i = 0; i < lines.length; i++) {
 
 			var line = lines[i];
+
 			line = line.trim();
 
 			if (line.length === 0 || line.charAt(0) === '#') {
@@ -127,9 +129,11 @@ class MTLLoader {
 			var pos = line.indexOf(' ');
 
 			var key = (pos >= 0) ? line.substring(0, pos) : line;
+
 			key = key.toLowerCase();
 
 			var value = (pos >= 0) ? line.substring(pos + 1) : '';
+
 			value = value.trim();
 
 			if (key === 'newmtl') {
@@ -143,7 +147,8 @@ class MTLLoader {
 
 				if (key === 'ka' || key === 'kd' || key === 'ks') {
 
-					var ss = value.split(delimiter_pattern, 3);
+					var ss = value.split(delimiterPattern, 3);
+
 					info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
 
 				} else {
@@ -157,6 +162,7 @@ class MTLLoader {
 		}
 
 		var materialCreator = new MaterialCreator(this.texturePath || this.path, this.materialOptions);
+
 		materialCreator.setCrossOrigin(this.crossOrigin);
 		materialCreator.setManager(this.manager);
 		materialCreator.setMaterials(materialsInfo);
@@ -166,7 +172,7 @@ class MTLLoader {
 }
 
 class MaterialCreator {
-	constructor(baseUrl, options) {
+	constructor (baseUrl, options) {
 
 		this.baseUrl = baseUrl || '';
 		this.options = options;
@@ -182,19 +188,19 @@ class MaterialCreator {
 
 	crossOrigin = 'Anonymous';
 
-	setCrossOrigin(value) {
+	setCrossOrigin (value) {
 
 		this.crossOrigin = value;
 
 	}
 
-	setManager(value) {
+	setManager (value) {
 
 		this.manager = value;
 
 	}
 
-	setMaterials(materialsInfo) {
+	setMaterials (materialsInfo) {
 
 		this.materialsInfo = this.convert(materialsInfo);
 		this.materials = {};
@@ -203,7 +209,7 @@ class MaterialCreator {
 
 	}
 
-	convert(materialsInfo) {
+	convert (materialsInfo) {
 
 		if (!this.options) return materialsInfo;
 
@@ -273,7 +279,7 @@ class MaterialCreator {
 
 	}
 
-	preload() {
+	preload () {
 
 		for (var mn in this.materialsInfo) {
 
@@ -283,13 +289,13 @@ class MaterialCreator {
 
 	}
 
-	getIndex(materialName) {
+	getIndex (materialName) {
 
 		return this.nameLookup[materialName];
 
 	}
 
-	getAsArray() {
+	getAsArray () {
 
 		var index = 0;
 
@@ -305,11 +311,11 @@ class MaterialCreator {
 
 	}
 
-	create(materialName) {
+	create (materialName) {
 
 		if (this.materials[materialName] === undefined) {
 
-			this.createMaterial_(materialName);
+			this.createMaterial(materialName);
 
 		}
 
@@ -317,7 +323,7 @@ class MaterialCreator {
 
 	}
 
-	createMaterial_(materialName) {
+	createMaterial (materialName) {
 
 		// Create material
 
@@ -330,7 +336,7 @@ class MaterialCreator {
 
 		};
 
-		function resolveURL(baseUrl, url) {
+		function resolveURL (baseUrl, url) {
 
 			if (typeof url !== 'string' || url === '')
 				return '';
@@ -342,7 +348,7 @@ class MaterialCreator {
 
 		}
 
-		function setMapForType(mapType, value) {
+		function setMapForType (mapType, value) {
 
 			if (params[mapType]) return; // Keep the first encountered texture
 
@@ -389,7 +395,7 @@ class MaterialCreator {
 
 					// Diffuse texture map
 
-					setMapForType("map", value);
+					setMapForType('map', value);
 
 					break;
 
@@ -397,13 +403,13 @@ class MaterialCreator {
 
 					// Specular map
 
-					setMapForType("specularMap", value);
+					setMapForType('specularMap', value);
 
 					break;
 
 				case 'norm':
 
-					setMapForType("normalMap", value);
+					setMapForType('normalMap', value);
 
 					break;
 
@@ -412,7 +418,7 @@ class MaterialCreator {
 
 					// Bump texture map
 
-					setMapForType("bumpMap", value);
+					setMapForType('bumpMap', value);
 
 					break;
 
@@ -461,7 +467,7 @@ class MaterialCreator {
 
 	}
 
-	getTextureParams(value, matParams) {
+	getTextureParams (value, matParams) {
 
 		var texParams = {
 
@@ -505,7 +511,7 @@ class MaterialCreator {
 
 	}
 
-	loadTexture(url, mapping, onLoad, onProgress, onError) {
+	loadTexture (url, mapping, onLoad, onProgress, onError) {
 
 		var texture;
 		var loader = THREE.Loader.Handlers.get(url);

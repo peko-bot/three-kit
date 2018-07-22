@@ -6,44 +6,45 @@
 import * as THREE from 'three';
 
 class OBJLoader {
-	constructor(manager) {
+	constructor (manager) {
 		this.manager = (manager !== undefined) ? manager : THREE.DefaultLoadingManager;
 
 		this.materials = null;
 
 		this.regexp = {
 			// v float float float
-			vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			vertexPattern: /^v\s+([\d|.|+|\-|e|E]+)\s+([\d|.|+|\-|e|E]+)\s+([\d|.|+|\-|e|E]+)/,
 			// vn float float float
-			normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			normalPattern: /^vn\s+([\d|.|+|\-|e|E]+)\s+([\d|.|+|\-|e|E]+)\s+([\d|.|+|\-|e|E]+)/,
 			// vt float float
-			uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			uvPattern: /^vt\s+([\d|.|+|\-|e|E]+)\s+([\d|.|+|\-|e|E]+)/,
 			// f vertex vertex vertex
-			face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+			faceVertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
 			// f vertex/uv vertex/uv vertex/uv
-			face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+			faceVertexUv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
 			// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-			face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+			faceVertexUvNormal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
 			// f vertex//normal vertex//normal vertex//normal
-			face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+			faceVertexNormal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
 			// o object_name | g group_name
-			object_pattern: /^[og]\s*(.+)?/,
+			objectPattern: /^[og]\s*(.+)?/,
 			// s boolean
-			smoothing_pattern: /^s\s+(\d+|on|off)/,
+			smoothingPattern: /^s\s+(\d+|on|off)/,
 			// mtllib file_reference
-			material_library_pattern: /^mtllib /,
+			materialLibraryPattern: /^mtllib /,
 			// usemtl material_name
-			material_use_pattern: /^usemtl /
+			materialUsePattern: /^usemtl /
 		};
 	}
 
-	load(url, onLoad, onProgress, onError) {
+	load (url, onLoad, onProgress, onError) {
 
 		var scope = this;
 
 		var loader = new THREE.FileLoader(scope.manager);
+
 		loader.setPath(this.path);
-		loader.load(url, function (text) {
+		loader.load(url, (text) => {
 
 			onLoad(scope.parse(text));
 
@@ -51,19 +52,19 @@ class OBJLoader {
 
 	}
 
-	setPath(value) {
+	setPath (value) {
 
 		this.path = value;
 
 	}
 
-	setMaterials(materials) {
+	setMaterials (materials) {
 
 		this.materials = materials;
 
 	}
 
-	_createParserState() {
+	createParserState () {
 
 		var state = {
 			objects: [],
@@ -89,9 +90,9 @@ class OBJLoader {
 
 				var previousMaterial = (this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined);
 
-				if (this.object && typeof this.object._finalize === 'function') {
+				if (this.object && typeof this.object.finalize === 'function') {
 
-					this.object._finalize(true);
+					this.object.finalize(true);
 
 				}
 
@@ -109,7 +110,7 @@ class OBJLoader {
 
 					startMaterial: function (name, libraries) {
 
-						var previous = this._finalize(false);
+						var previous = this.finalize(false);
 
 						// New usemtl declaration overwrites an inherited material, except if faces were declared
 						// after the material, then it must be preserved for proper MultiMaterial continuation.
@@ -140,6 +141,7 @@ class OBJLoader {
 									groupCount: -1,
 									inherited: false
 								};
+
 								cloned.clone = this.clone.bind(cloned);
 								return cloned;
 							}
@@ -161,9 +163,10 @@ class OBJLoader {
 
 					},
 
-					_finalize: function (end) {
+					finalize: function (end) {
 
 						var lastMultiMaterial = this.currentMaterial();
+
 						if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
 
 							lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
@@ -204,9 +207,10 @@ class OBJLoader {
 				// overwrite the inherited material. Exception being that there was already face declarations
 				// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
 
-				if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
+				if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === 'function') {
 
 					var declared = previousMaterial.clone(0);
+
 					declared.inherited = true;
 					this.object.materials.push(declared);
 
@@ -218,9 +222,9 @@ class OBJLoader {
 
 			finalize: function () {
 
-				if (this.object && typeof this.object._finalize === 'function') {
+				if (this.object && typeof this.object.finalize === 'function') {
 
-					this.object._finalize(true);
+					this.object.finalize(true);
 
 				}
 
@@ -229,6 +233,7 @@ class OBJLoader {
 			parseVertexIndex: function (value, len) {
 
 				var index = parseInt(value, 10);
+
 				return (index >= 0 ? index - 1 : index + len / 3) * 3;
 
 			},
@@ -236,6 +241,7 @@ class OBJLoader {
 			parseNormalIndex: function (value, len) {
 
 				var index = parseInt(value, 10);
+
 				return (index >= 0 ? index - 1 : index + len / 3) * 3;
 
 			},
@@ -243,6 +249,7 @@ class OBJLoader {
 			parseUVIndex: function (value, len) {
 
 				var index = parseInt(value, 10);
+
 				return (index >= 0 ? index - 1 : index + len / 2) * 2;
 
 			},
@@ -365,6 +372,7 @@ class OBJLoader {
 
 					// Normals are many times the same. If so, skip function call and parseInt.
 					var nLen = this.normals.length;
+
 					ia = this.parseNormalIndex(na, nLen);
 
 					ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
@@ -400,7 +408,9 @@ class OBJLoader {
 
 				}
 
-				for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
+				l = uvs.length;
+
+				for (var uvi = 0; uvi < l; uvi++) {
 
 					this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
 
@@ -416,11 +426,11 @@ class OBJLoader {
 
 	}
 
-	parse(text) {
+	parse (text) {
 
 		console.time('OBJLoader');
 
-		var state = this._createParserState();
+		var state = this.createParserState();
 
 		if (text.indexOf('\r\n') !== - 1) {
 
@@ -463,7 +473,7 @@ class OBJLoader {
 
 				lineSecondChar = line.charAt(1);
 
-				if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
+				if (lineSecondChar === ' ' && (result = this.regexp.vertexPattern.exec(line)) !== null) {
 
 					// 0                  1      2      3
 					// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
@@ -474,7 +484,7 @@ class OBJLoader {
 						parseFloat(result[3])
 					);
 
-				} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
+				} else if (lineSecondChar === 'n' && (result = this.regexp.normalPattern.exec(line)) !== null) {
 
 					// 0                   1      2      3
 					// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
@@ -485,7 +495,7 @@ class OBJLoader {
 						parseFloat(result[3])
 					);
 
-				} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
+				} else if (lineSecondChar === 't' && (result = this.regexp.uvPattern.exec(line)) !== null) {
 
 					// 0               1      2
 					// ["vt 0.1 0.2", "0.1", "0.2"]
@@ -497,13 +507,13 @@ class OBJLoader {
 
 				} else {
 
-					throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
+					throw new Error('Unexpected vertex/normal/uv line: \'' + line + '\'');
 
 				}
 
-			} else if (lineFirstChar === "f") {
+			} else if (lineFirstChar === 'f') {
 
-				if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
+				if ((result = this.regexp.faceVertexUvNormal.exec(line)) !== null) {
 
 					// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
 					// 0                        1    2    3    4    5    6    7    8    9   10         11         12
@@ -515,7 +525,7 @@ class OBJLoader {
 						result[3], result[6], result[9], result[12]
 					);
 
-				} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
+				} else if ((result = this.regexp.faceVertexUv.exec(line)) !== null) {
 
 					// f vertex/uv vertex/uv vertex/uv
 					// 0                  1    2    3    4    5    6   7          8
@@ -526,7 +536,7 @@ class OBJLoader {
 						result[2], result[4], result[6], result[8]
 					);
 
-				} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
+				} else if ((result = this.regexp.faceVertexNormal.exec(line)) !== null) {
 
 					// f vertex//normal vertex//normal vertex//normal
 					// 0                     1    2    3    4    5    6   7          8
@@ -538,7 +548,7 @@ class OBJLoader {
 						result[2], result[4], result[6], result[8]
 					);
 
-				} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
+				} else if ((result = this.regexp.faceVertex.exec(line)) !== null) {
 
 					// f vertex vertex vertex
 					// 0            1    2    3   4
@@ -550,16 +560,16 @@ class OBJLoader {
 
 				} else {
 
-					throw new Error("Unexpected face line: '" + line + "'");
+					throw new Error('Unexpected face line: \'' + line + '\'');
 
 				}
 
-			} else if (lineFirstChar === "l") {
+			} else if (lineFirstChar === 'l') {
 
-				var lineParts = line.substring(1).trim().split(" ");
+				var lineParts = line.substring(1).trim().split(' ');
 				var lineVertices = [], lineUVs = [];
 
-				if (line.indexOf("/") === - 1) {
+				if (line.indexOf('/') === - 1) {
 
 					lineVertices = lineParts;
 
@@ -567,17 +577,17 @@ class OBJLoader {
 
 					for (var li = 0, llen = lineParts.length; li < llen; li++) {
 
-						var parts = lineParts[li].split("/");
+						var parts = lineParts[li].split('/');
 
-						if (parts[0] !== "") lineVertices.push(parts[0]);
-						if (parts[1] !== "") lineUVs.push(parts[1]);
+						if (parts[0] !== '') lineVertices.push(parts[0]);
+						if (parts[1] !== '') lineUVs.push(parts[1]);
 
 					}
 
 				}
 				state.addLineGeometry(lineVertices, lineUVs);
 
-			} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
+			} else if ((result = this.regexp.objectPattern.exec(line)) !== null) {
 
 				// o object_name
 				// or
@@ -585,23 +595,23 @@ class OBJLoader {
 
 				// WORKAROUND: https://bugs.chromium.org/p/v8/issues/detail?id=2869
 				// var name = result[ 0 ].substr( 1 ).trim();
-				var name = (" " + result[0].substr(1).trim()).substr(1);
+				var name = (' ' + result[0].substr(1).trim()).substr(1);
 
 				state.startObject(name);
 
-			} else if (this.regexp.material_use_pattern.test(line)) {
+			} else if (this.regexp.materialUsePattern.test(line)) {
 
 				// material
 
 				state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
 
-			} else if (this.regexp.material_library_pattern.test(line)) {
+			} else if (this.regexp.materialLibraryPattern.test(line)) {
 
 				// mtl file
 
 				state.materialLibraries.push(line.substring(7).trim());
 
-			} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
+			} else if ((result = this.regexp.smoothingPattern.exec(line)) !== null) {
 
 				// smooth shading
 
@@ -613,9 +623,11 @@ class OBJLoader {
 				// Example asset: examples/models/obj/cerberus/Cerberus.obj
 
 				var value = result[1].trim().toLowerCase();
+
 				state.object.smooth = (value === '1' || value === 'on');
 
 				var material = state.object.currentMaterial();
+
 				if (material) {
 
 					material.smooth = state.object.smooth;
@@ -627,7 +639,7 @@ class OBJLoader {
 				// Handle null terminated files without exception
 				if (line === '\0') continue;
 
-				throw new Error("Unexpected line: '" + line + "'");
+				throw new Error('Unexpected line: \'' + line + '\'');
 
 			}
 
@@ -636,9 +648,10 @@ class OBJLoader {
 		state.finalize();
 
 		var container = new THREE.Group();
+
 		container.materialLibraries = [].concat(state.materialLibraries);
 
-		for (var i = 0, l = state.objects.length; i < l; i++) {
+		for (i = 0, l = state.objects.length; i < l; i++) {
 
 			var object = state.objects[i];
 			var geometry = object.geometry;
@@ -675,7 +688,8 @@ class OBJLoader {
 			for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
 
 				var sourceMaterial = materials[mi];
-				var material = undefined;
+
+				material = undefined;
 
 				if (this.materials !== null) {
 
@@ -685,6 +699,7 @@ class OBJLoader {
 					if (isLine && material && !(material instanceof THREE.LineBasicMaterial)) {
 
 						var materialLine = new THREE.LineBasicMaterial();
+
 						materialLine.copy(material);
 						material = materialLine;
 
@@ -711,9 +726,10 @@ class OBJLoader {
 
 			if (createdMaterials.length > 1) {
 
-				for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+				for (mi = 0, miLen = materials.length; mi < miLen; mi++) {
 
-					var sourceMaterial = materials[mi];
+					sourceMaterial = materials[mi];
+
 					buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
 
 				}

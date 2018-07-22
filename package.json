@@ -13,6 +13,7 @@
     "tween": "latest"
   },
   "devDependencies": {
+    "babel-eslint": "^8.2.6",
     "babel-core": "latest",
     "babel-loader": "latest",
     "babel-plugin-import": "latest",
@@ -22,6 +23,7 @@
     "clean-webpack-plugin": "latest",
     "copy-webpack-plugin": "latest",
     "css-loader": "latest",
+    "eslint": "^5.2.0",
     "html-webpack-plugin": "latest",
     "mini-css-extract-plugin": "latest",
     "postcss-loader": "latest",
