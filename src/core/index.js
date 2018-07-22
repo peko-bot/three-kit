@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-07-22 21:34:09
+ * @Last Modified time: 2018-07-22 22:36:02
  */
 import * as THREE from 'three';
 import MTLLoader from '../loader/MTLLoader';

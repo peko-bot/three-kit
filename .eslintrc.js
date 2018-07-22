@@ -69,6 +69,10 @@ module.exports = {
         // }]
         'prefer-arrow-callback': 2, // 优先使用箭头函数
         'no-empty': 0, // 是否能写空对象{}
+        'no-duplicate-imports': 2, // import同一模块下的方法需要放到同一个花括号中，import { test1, test2 } = module
+        'no-floating-decimal': 2, // 浮点数要写全，0.5
+        // 'object-property-newline': 2, // 声明对象时，变量要么写在一行，要么一行一个
+        'space-before-blocks': 2, // 小括号和花括号之间是否写空格，if() {}
     }
 };
 
