@@ -19,9 +19,9 @@ npm run build，需要自行引入three.js
   import Trunk from '../dist/Trunk'
 
   ComponentDidMount = () => {
-    const trunk = new Trunk();
+    const trunk = new Trunk(config);
 
-    trunk.init(config);
+    trunk.init();
   }
 ```
 
@@ -34,12 +34,12 @@ npm run build，需要自行引入three.js
 ## Trunk对象上绑定的方法
 | 名称 | 说明 | 用法 |
 | :------: | ----- | :------: |
-| init | 初始化方法， | Trunk.init(config) |
+| init | 初始化方法， | Trunk.init() |
 | getObject | 获得最新模型数据集 | Trunk.getObject() |
 | refreshPillar | 重新请求数据并刷新柱子, 需传入新的模型数据.  TODO 指定某对象刷新数据和模型 | Trunk.refreshPillar(object) |
 | showTexture | 设置等值面模型材质和贴图, 具体用法见下 | Trunk.showTexture(config, url) |
 
-## Trunk.show_texture(config, url)
+## Trunk.showTexture(config, url)
 | 参数 | 说明 | 类型 | 默认值 |
 | :------: | ----- | :------: | :------: |
 | config | 控制等值面是否显示，visible可以不用传，其它属性和mesh.material中的属性对应，形如{ transparent: true, opacity: 0.5 } | {} | 无 |

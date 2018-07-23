@@ -1,3 +1,4 @@
 /dist/
 /node_modules/
-*/assets/
+/demo/assets/data/
+/demo/assets/plugins/

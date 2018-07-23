@@ -2,13 +2,99 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:34:46
  * @Last Modified by: zy9
- * @Last Modified time: 2018-07-22 22:34:03
+ * @Last Modified time: 2018-07-23 22:18:02
  */
 import * as THREE from 'three';
-import Trunk from '../src';
-// import Trunk from '../dist/Trunk';
+// import Trunk from '../src';
+import Trunk from '../dist/Trunk';
 
-const trunk = new Trunk();
+const trunk = new Trunk({
+	container: document.getElementById('container'), // 画布挂载节点
+	// clearColor: 0x4584b4, // 画布颜色
+	meshShiftTime: () => 2000, // 定义各板块移动速度
+	childMapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
+	// clientWidth: 1158,
+	// clientHeight: 568,
+	cameraPosition: { z: 55 },
+	afterRotation: -Math.PI / 3,
+	beforeAnimate: (child, visible) => { // 用于控制开场动画中的边界
+		const { name } = child;
+
+		if(name === 'line' || name.includes('border') || name.includes('pillar') || name.includes('bottom') || name.includes('river')) {
+			child.visible = !!visible;
+		}
+	},
+	light: () => {
+		let lights = [];
+
+		// let directionalLight = new THREE.DirectionalLight('white');
+		// directionalLight.position.set(-50, 0, 160);
+		// lights.push(directionalLight);
+
+		let hemisphere = new THREE.HemisphereLight(16777215, 16777215, 0.5);
+
+		lights.push(hemisphere);
+
+		// let ambientLight = new THREE.AmbientLight('white');
+		// lights.push(ambientLight);
+
+		let spotLight = new THREE.SpotLight('white', 8, 250, 0.44, 1, 2);
+
+		spotLight.position.set(-50, 120, 160);
+		spotLight.castShadow = true;
+		lights.push(spotLight);
+
+		let spotLight2 = new THREE.SpotLight('white');
+
+		spotLight2.position.set(250, 100, 100);
+		spotLight2.intensity = 0.6;
+		// spotLight2.castShadow = true;
+		lights.push(spotLight2);
+
+		return lights;
+	},
+	texture: {
+		select: '#06dbab',
+		top: '#067acf'
+	},
+	divisor: 250,
+	setMaterial: materials => {
+		let info = materials.materialsInfo;
+
+		for(let key in info) {
+			let value = info[key];
+
+			// 初始化等值面
+			key === 'texture' && (value['map_d'] = value['map_ka'] = value['map_kd'] = './assets/data/images/20180413180000_20180416180000.png');
+		}
+
+		return materials;
+	},
+	data: {
+		materials: ['./assets/data/model/deqing17.mtl'],
+		objects: ['./assets/data/model/deqing17.obj'],
+		load: search
+	},
+	showDetail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
+		let detail = document.getElementById('detail');
+
+		// 当点到边界或者柱子的时候不移动模型
+		if(Object.getOwnPropertyNames(child.userData).length !== 0) {
+			detail.children.length !== 0 && (detail.innerHTML = '');
+
+			createTable(child, detail);
+			return true;
+		}
+	},
+	controls: { // 轨道控制参数
+		maxPolarAngle: Math.PI / 3 * 2,
+		minPolarAngle: Math.PI / 6,
+		maxDistance: 200,
+		minDistance: 55,
+		maxAzimuthAngle: 0, // 不能右旋
+		minAzimuthAngle: 0 // 不能左旋
+	}
+});
 
 window.onload = () => {
 	load();
@@ -19,7 +105,6 @@ window.onresize = () => {
 };
 
 const load = () => {
-	// require.ensure([], () => {});
 	// 刷新数据和柱子
 	let refreshPillar = document.getElementById('refreshPillar');
 
@@ -28,95 +113,9 @@ const load = () => {
 	// 显示等值面
 	let timeline = document.getElementById('timeline');
 
-	timeline.addEventListener('click', () => trunk.show_texture({ transparent: true, opacity: 0.5 }, './assets/data/images/20180404100000_20180416100000.png'), false);
+	timeline.addEventListener('click', () => trunk.showTexture({ transparent: true, opacity: 0.5 }, './assets/data/images/20180404100000_20180416100000.png'));
 
-	trunk.init({
-		container: document.getElementById('container'), // 画布挂载节点
-		// clear_color: 0x4584b4, // 画布颜色
-		meshShiftTime: () => 2000, // 定义各板块移动速度
-		childMapping, // 手动设置实体贴图及其他，可以理解为遍历模型数据时的回调。该方法存在时，texture中只有select和top会生效
-		// clientWidth: 1158,
-		// clientHeight: 568,
-		cameraPosition: { z: 55 },
-		afterRotation: -Math.PI / 3,
-		beforeAnimate: (child, visible) => { // 用于控制开场动画中的边界
-			const { name } = child;
-
-			if(name === 'line' || name.includes('border') || name.includes('pillar') || name.includes('bottom') || name.includes('river')) {
-				child.visible = !!visible;
-			}
-		},
-		light: () => {
-			let lights = [];
-
-			// let directionalLight = new THREE.DirectionalLight('white');
-			// directionalLight.position.set(-50, 0, 160);
-			// lights.push(directionalLight);
-
-			let hemisphere = new THREE.HemisphereLight(16777215, 16777215, 0.5);
-
-			lights.push(hemisphere);
-
-			// let ambientLight = new THREE.AmbientLight('white');
-			// lights.push(ambientLight);
-
-			let spotLight = new THREE.SpotLight('white', 8, 250, 0.44, 1, 2);
-
-			spotLight.position.set(-50, 120, 160);
-			spotLight.castShadow = true;
-			lights.push(spotLight);
-
-			let spotLight2 = new THREE.SpotLight('white');
-
-			spotLight2.position.set(250, 100, 100);
-			spotLight2.intensity = 0.6;
-			// spotLight2.castShadow = true;
-			lights.push(spotLight2);
-
-			return lights;
-		},
-		texture: {
-			select: '#06dbab',
-			top: '#067acf'
-		},
-		divisor: 250,
-		setMaterial: materials => {
-			let info = materials.materialsInfo;
-
-			for(let key in info) {
-				let value = info[key];
-
-				// 初始化等值面
-				key === 'texture' && (value['map_d'] = value['map_ka'] = value['map_kd'] = './assets/data/images/20180413180000_20180416180000.png');
-			}
-
-			return materials;
-		},
-		data: {
-			materials: ['./assets/data/model/deqing17.mtl'],
-			objects: ['./assets/data/model/deqing17.obj'],
-			load: (object, goon) => search(object, goon)
-		},
-		showDetail: child => { // 这方法主要是把点击的模型传出来，具体要做什么自己写
-			let detail = document.getElementById('detail');
-
-			// 当点到边界或者柱子的时候不移动模型
-			if(Object.getOwnPropertyNames(child.userData).length !== 0) {
-				detail.children.length !== 0 && (detail.innerHTML = '');
-
-				createTable(child, detail);
-				return true;
-			}
-		},
-		controls: { // 轨道控制参数
-			maxPolarAngle: Math.PI / 3 * 2,
-			minPolarAngle: Math.PI / 6,
-			maxDistance: 200,
-			minDistance: 55,
-			maxAzimuthAngle: 0, // 不能右旋
-			minAzimuthAngle: 0 // 不能左旋
-		}
-	});
+	trunk.init();
 };
 
 /**
@@ -228,7 +227,7 @@ function search (object, goon) {
 	fetch('./assets/data/simulation.json?t=' + ~~(Math.random() * 1000)).then(response => {
 		return response.json();
 	}).then(result => {
-		object = object ? object : trunk.get_object();
+		object = object ? object : trunk.getObject();
 
 		for(let item of result.data) { // 处理业务数据和模型数据，使板块和表格数据对应
 			for(let jtem of object.children) {
