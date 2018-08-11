@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-08-11 17:08:51
+ * @Last Modified time: 2018-08-11 17:16:19
  */
 import * as THREE from 'three';
 import Loader from './Loader';
@@ -97,7 +97,7 @@ export default class Trunk extends LifeCycle {
 
 		let p = _startPositions[area];
 
-		this.config.before_animate && this.config.before_animate(child);
+		this.config.beforeAnimate && this.config.beforeAnimate(child);
 
 		if (!p) {
 			p = {
@@ -638,7 +638,7 @@ export default class Trunk extends LifeCycle {
 
 					// TODO 这里不该循环，应急
 					for (let child of object.children) {
-						this.config.before_animate && this.config.before_animate(child, true);
+						this.config.beforeAnimate && this.config.beforeAnimate(child, true);
 					}
 
 					// 绑定事件，比如鼠标移到板块上高亮
