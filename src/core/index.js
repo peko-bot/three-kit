@@ -2,7 +2,7 @@
  * @Author: zy9@github.com/zy410419243
  * @Date: 2018-04-24 15:33:50
  * @Last Modified by: zy9
- * @Last Modified time: 2018-07-23 22:16:42
+ * @Last Modified time: 2018-08-11 17:08:51
  */
 import * as THREE from 'three';
 import Loader from './Loader';
@@ -10,8 +10,12 @@ import OrbitControls from 'three-orbitcontrols';
 import TWEEN from 'tween';
 import extend from '../util/DeepClone';
 
-export default class Trunk {
+import LifeCycle from './lifecycle';
+
+export default class Trunk extends LifeCycle {
 	constructor (config) {
+		super(config);
+
 		this.config = extend(this.config, config);
 
 		this.initParams(this.config);

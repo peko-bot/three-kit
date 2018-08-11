@@ -5,8 +5,8 @@
  * @Last Modified time: 2018-07-23 22:18:02
  */
 import * as THREE from 'three';
-// import Trunk from '../src';
-import Trunk from '../dist/Trunk';
+import Trunk from '../src';
+// import Trunk from '../dist/Trunk';
 
 const trunk = new Trunk({
 	container: document.getElementById('container'), // 画布挂载节点
