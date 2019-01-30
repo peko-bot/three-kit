@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "three": "^0.94.0",
+    "three": "^0.100.0",
     "three-orbitcontrols": "^2.1.2",
     "tween": "^0.9.0"
   },
