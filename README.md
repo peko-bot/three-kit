@@ -1,4 +1,7 @@
 # three-kit
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/zy410419243/three-kit.svg)](https://greenkeeper.io/)
+
 - three.js的一实现封装
   
 # 用法
