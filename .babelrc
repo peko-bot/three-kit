@@ -1,7 +1,8 @@
 {
-    "presets": [
-        "env",
-        "stage-0"
-    ],
-    "plugins": []
+  "presets": ["@babel/preset-react", "@babel/preset-env"],
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-proposal-export-default-from"
+  ]
 }
