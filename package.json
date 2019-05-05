@@ -3,13 +3,12 @@
   "version": "1.0.2",
   "scripts": {
     "start": "node webpack.dev.js",
-    "build": "node webpack.prod.js",
-    "push": "git add .&& git commit -m \"update\" && git push"
+    "build": "node webpack.prod.js"
   },
   "license": "MIT",
   "dependencies": {
     "three": "^0.104.0",
-    "three-orbitcontrols": "^2.1.2",
+    "three-orbitcontrols": "^2.102.1",
     "tween": "^0.9.0"
   },
   "devDependencies": {
@@ -18,19 +17,19 @@
     "babel-loader": "^8.0.5",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
-    "chalk": "^2.4.1",
+    "chalk": "^2.4.2",
     "clean-webpack-plugin": "^2.0.1",
-    "copy-webpack-plugin": "^5.0.0",
-    "css-loader": "^2.1.0",
-    "eslint": "^5.2.0",
+    "copy-webpack-plugin": "^5.0.3",
+    "css-loader": "^2.1.1",
+    "eslint": "^5.16.0",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.6.0",
     "postcss-loader": "^3.0.0",
     "style-loader": "^0.23.1",
     "toho-log-plugin": "^1.0.12",
-    "url-loader": "^1.0.1",
-    "webpack": "^4.28.3",
-    "webpack-cli": "^3.2.0",
-    "webpack-dev-server": "^3.1.14"
+    "url-loader": "^1.1.2",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.3.1"
   }
 }
