@@ -27,7 +27,7 @@
     "mini-css-extract-plugin": "^0.6.0",
     "postcss-loader": "^3.0.0",
     "style-loader": "^0.23.1",
-    "toho-log-plugin": "git+https://github.com/zy410419243/toho-log-plugin.git",
+    "toho-log-plugin": "^1.0.12",
     "url-loader": "^1.0.1",
     "webpack": "^4.28.3",
     "webpack-cli": "^3.2.0",
