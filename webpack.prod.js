@@ -6,7 +6,7 @@
  */
 const webpack = require('webpack');
 const fs = require('fs');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // const CopyWebpackPlugin = require('copy-webpack-plugin');
 // const TohoLogPlugin = require('toho-log-plugin');
 const TohoLogPlugin = require('./plugins/toho-log-plugin');
@@ -26,20 +26,22 @@ let plugins = commonPlugin;
 
 plugins.push(new TohoLogPlugin({ dev: false }));
 
-plugins.push(new CleanWebpackPlugin(['dist'], {
-	verbose: false
-}));
+plugins.push(
+	new CleanWebpackPlugin({
+		verbose: false,
+	}),
+);
 
 const options = {
 	mode: 'production',
 	devServer: {
-		port: 9099
+		port: 9099,
 	},
 	resolve: {
 		extensions: ['.js'],
 	},
 	externals: {
-		'three': 'three'
+		three: 'three',
 	},
 	devtool: 'source-map',
 	entry: {
@@ -49,10 +51,10 @@ const options = {
 		path: __dirname + '/dist',
 		filename: '[name].js',
 		chunkFilename: 'vendor/[name].js',
-		libraryTarget: 'umd'
+		libraryTarget: 'umd',
 	},
 	plugins,
-	module: commonModule
+	module: commonModule,
 };
 
 webpack(options).run();
